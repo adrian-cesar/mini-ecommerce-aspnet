@@ -1,5 +1,5 @@
 🛒 Mini E-commerce Web – ASP.NET Core
-👨‍💻 Integrantes
+-Integrantes
 
 Adrian Gonçalves
 
