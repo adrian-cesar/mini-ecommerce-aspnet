@@ -102,8 +102,8 @@ Transação
 
 Venda com validação de estoque e atualização automática
 
-📅 7. Organização das Tarefas (Dupla)
-Adrian
+📅 7. Organização das Tarefas:
+-Adrian
 
 Estrutura do projeto
 
@@ -115,7 +115,7 @@ Implementação de autenticação JWT
 
 Implementação dos padrões de projeto
 
-Renato
+-Renato
 
 Desenvolvimento do Front-end
 
