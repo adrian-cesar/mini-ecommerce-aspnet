@@ -1,128 +1,142 @@
-🛒 Mini E-commerce Web – ASP.NET Core
--Integrantes
+# 🛒 Mini E-commerce Web – ASP.NET Core  
 
-Adrian Gonçalves
+## 👨‍💻 Integrantes  
+- Adrian Gonçalves  
+- Renato Colin Neto  
 
-Renato Colin Neto
+---
 
-📌 1. Domínio do Problema
+# 📌 1. Domínio do Problema  
 
 Pequenas lojas precisam de um sistema simples para gerenciar seus produtos, clientes e vendas.
 
 O sistema permitirá:
 
-Cadastro de produtos
+- Cadastro de produtos  
+- Cadastro de clientes  
+- Registro de vendas  
+- Controle automático de estoque  
+- Autenticação de usuários  
 
-Cadastro de clientes
+A cada venda realizada, o sistema deve verificar o estoque disponível e atualizar automaticamente as quantidades.
 
-Registro de vendas
+---
 
-Controle automático de estoque
+# 📋 2. Requisitos Funcionais (RF)
 
-Autenticação de usuários
+- **RF01** – O sistema deve permitir cadastro de produtos  
+- **RF02** – O sistema deve permitir cadastro de clientes  
+- **RF03** – O sistema deve registrar vendas  
+- **RF04** – O sistema deve atualizar automaticamente o estoque após uma venda  
+- **RF05** – O sistema deve permitir autenticação via login  
 
-A cada venda realizada, o sistema deve verificar o estoque e atualizar automaticamente as quantidades disponíveis.
+---
 
-📋 2. Requisitos Funcionais (RF)
+# 📋 3. Requisitos Não Funcionais (RNF)
 
-RF01 – O sistema deve permitir cadastro de produtos
-RF02 – O sistema deve permitir cadastro de clientes
-RF03 – O sistema deve registrar vendas
-RF04 – O sistema deve atualizar automaticamente o estoque após uma venda
-RF05 – O sistema deve permitir autenticação via login
+- **RNF01** – O sistema deve utilizar arquitetura MVC  
+- **RNF02** – O sistema deve ser uma aplicação web monolítica  
+- **RNF03** – O sistema deve utilizar autenticação via JWT  
+- **RNF04** – O sistema deve utilizar banco de dados relacional  
+- **RNF05** – O sistema deve possuir testes unitários básicos  
 
-📋 3. Requisitos Não Funcionais (RNF)
+---
 
-RNF01 – O sistema deve utilizar arquitetura MVC
-RNF02 – O sistema deve ser uma aplicação web monolítica
-RNF03 – O sistema deve utilizar autenticação via JWT
-RNF04 – O sistema deve utilizar banco relacional
-RNF05 – O sistema deve possuir testes unitários básicos
+# 🏗 4. Arquitetura  
 
-🏗 4. Arquitetura
+O sistema será desenvolvido utilizando **arquitetura monolítica** com padrão **MVC (Model-View-Controller)**.
 
-O sistema será desenvolvido utilizando arquitetura monolítica com padrão MVC (Model-View-Controller).
+### Separação em camadas:
 
-Separação em camadas:
+- **Controllers** → Responsáveis pelas rotas e controle das requisições HTTP  
+- **Services** → Implementação das regras de negócio  
+- **Repositories** → Camada de acesso ao banco de dados  
+- **Models** → Representação das entidades do sistema  
+- **Views (Razor)** → Camada de apresentação (interface com o usuário)  
 
-Controllers → Responsável pelas rotas da API
+Essa organização garante separação de responsabilidades e melhor manutenção do sistema.
 
-Services → Regras de negócio
+---
 
-Repositories → Acesso ao banco
+# 🛠 5. Tecnologias Utilizadas e Justificativas  
 
-Models → Entidades do sistema
+🔹 ASP.NET Core  
+Framework para desenvolvimento de aplicações Web em C#.  
+**Justificativa:** Framework moderno, robusto, multiplataforma e amplamente utilizado no mercado.
 
-🛠 5. Tecnologias Utilizadas e Justificativas
-🔹 ASP.NET Core
+---
 
-Framework para desenvolvimento de aplicações Web em C#.
-Justificativa: Framework moderno, robusto e amplamente utilizado no mercado.
+🔹 Razor (View Engine do ASP.NET Core)  
+Tecnologia utilizada para construção das páginas do sistema (front-end).  
+**Justificativa:** Permite integração direta com o backend mantendo arquitetura monolítica baseada em MVC.
 
-🔹 Entity Framework Core
+---
 
-ORM para comunicação com banco de dados.
-Justificativa: Permite mapear classes para tabelas de forma simples e organizada.
+🔹 Bootstrap  
+Framework CSS utilizado para estilização da interface.  
+**Justificativa:** Permite desenvolvimento rápido de interfaces responsivas e organizadas, melhorando a experiência do usuário.
 
-🔹 SQL Server / PostgreSQL
+---
 
-Banco de dados relacional.
-Justificativa: Armazenamento persistente e seguro das informações.
+🔹 Entity Framework Core  
+ORM para comunicação com banco de dados.  
+**Justificativa:** Permite mapear classes para tabelas de forma simples e organizada, facilitando persistência de dados.
 
-🔹 JWT (Json Web Token)
+---
 
-Autenticação baseada em token.
-Justificativa: Segurança e controle de acesso às rotas protegidas.
+🔹 SQL Server / PostgreSQL  
+Banco de dados relacional.  
+**Justificativa:** Armazenamento persistente, seguro e estruturado das informações do sistema.
 
-🔹 xUnit
+---
 
-Framework de testes unitários.
-Justificativa: Garantir confiabilidade nas regras de negócio.
+🔹 JWT (Json Web Token)  
+Autenticação baseada em token.  
+**Justificativa:** Permite controle de acesso seguro às rotas protegidas da aplicação.
+
+---
+
+🔹 xUnit  
+Framework para testes unitários.  
+**Justificativa:** Garantir confiabilidade e validação das regras de negócio.
+
+---
 
 🔹 Padrões de Projeto (GoF)
 
 Serão aplicados:
 
-Strategy → Para formas de pagamento
+- **Strategy** → Para implementação das diferentes formas de pagamento  
+- **Facade** → Centralização da lógica da venda no serviço responsável  
+- Singleton** → Utilização na configuração e injeção de dependências  
 
-Facade → Centralização da lógica de venda
+Justificativa:** Aplicação de boas práticas conforme literatura clássica de Engenharia de Software.
 
-Singleton → Configuração de serviços
+---
 
-Justificativa: Aplicação de boas práticas conforme literatura clássica de Engenharia de Software.
+🔄 6. Funcionalidades Principais  
 
-🔄 6. Funcionalidades Principais
-CRUD
+✅ CRUD
+- Produto  
+- Cliente  
 
-Produto
+✅ Transação
+- Venda com validação de estoque e atualização automática  
 
-Cliente
+---
 
-Transação
+📅 7. Organização das Tarefas  
 
-Venda com validação de estoque e atualização automática
+🔹 Adrian
+- Estrutura do projeto  
+- Backend (Controllers, Services, Repositories)  
+- Configuração do banco  
+- Implementação da autenticação JWT  
+- Implementação dos padrões de projeto  
 
-📅 7. Organização das Tarefas:
--Adrian
-
-Estrutura do projeto
-
-Backend (Controllers, Services, Repositories)
-
-Configuração do banco
-
-Implementação de autenticação JWT
-
-Implementação dos padrões de projeto
-
--Renato
-
-Desenvolvimento do Front-end
-
-Integração com API
-
-Documentação
-
-Testes e validação
-
-Auxílio na modelagem do banco
+🔹 Renato
+- Desenvolvimento do Front-end (Razor + Bootstrap)  
+- Integração com a API  
+- Documentação  
+- Testes e validação  
+- Auxílio na modelagem do banco  
