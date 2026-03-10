@@ -1,0 +1,184 @@
+@startuml C4_Context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+LAYOUT_TOP_DOWN()
+
+title [Nível 1] Contexto do Sistema - Mini E-commerce Web
+
+Person(usuario, "Usuário", "Responsável pela loja. Realiza login, gerencia produtos, clientes e registra vendas.")
+
+System(miniEcommerce, "Mini E-commerce Web", "Sistema monolítico MVC em ASP.NET Core que permite cadastro de produtos, cadastro de clientes, registro de vendas com controle automático de estoque e autenticação via JWT.")
+
+Rel(usuario, miniEcommerce, "Acessa via navegador web", "HTTPS")
+@enduml
+
+@startuml C4_Containers
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_TOP_DOWN()
+
+title [Nível 2] Diagrama de Contêineres - Mini E-commerce Web
+
+Person(usuario, "Usuário", "Responsável pela loja. Gerencia produtos, clientes e vendas.")
+
+System_Boundary(miniEcommerce, "Mini E-commerce Web") {
+    Container(webApp, "Aplicação Web", "ASP.NET Core MVC, Razor, Bootstrap", "Aplicação monolítica que serve as páginas HTML via Razor Views, processa requisições HTTP nos Controllers, aplica regras de negócio nos Services e acessa dados via Repositories. Autenticação via JWT.")
+    ContainerDb(db, "Banco de Dados", "SQL Server / PostgreSQL", "Armazena dados de produtos, clientes, vendas, itens de venda e usuários.")
+}
+
+Rel(usuario, webApp, "Acessa via navegador", "HTTPS")
+Rel(webApp, db, "Lê e escreve dados", "Entity Framework Core")
+@enduml
+
+@startuml C4_Components
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+
+title [Nível 3] Diagrama de Componentes - Aplicação Web (ASP.NET Core MVC)
+
+Container_Boundary(webApp, "Aplicação Web - ASP.NET Core MVC") {
+    Component(razorViews, "Views", "Razor Pages, Bootstrap", "Camada de apresentação: renderiza páginas HTML responsivas para o usuário")
+
+    Component(produtoController, "ProdutoController", "ASP.NET Core Controller", "Endpoints HTTP para CRUD de produtos")
+    Component(clienteController, "ClienteController", "ASP.NET Core Controller", "Endpoints HTTP para CRUD de clientes")
+    Component(vendaController, "VendaController", "ASP.NET Core Controller", "Endpoints HTTP para registro de vendas")
+    Component(authController, "AuthController", "ASP.NET Core Controller", "Endpoints HTTP para login e autenticação")
+
+    Component(produtoService, "ProdutoService", "C# Service", "Regras de negócio para produtos e controle de estoque")
+    Component(clienteService, "ClienteService", "C# Service", "Regras de negócio para clientes")
+    Component(vendaService, "VendaService", "C# Service (Facade)", "Centraliza a lógica de venda: valida estoque, calcula valor total e atualiza estoque automaticamente. Padrão Facade.")
+    Component(pagamentoStrategy, "IPagamentoStrategy", "C# Interface (Strategy)", "Define diferentes formas de pagamento utilizando o padrão Strategy")
+    Component(authService, "AuthService", "C# Service", "Lógica de autenticação, validação de credenciais e geração de token JWT")
+
+    Component(produtoRepository, "ProdutoRepository", "C# Repository, EF Core", "Acesso a dados de produtos")
+    Component(clienteRepository, "ClienteRepository", "C# Repository, EF Core", "Acesso a dados de clientes")
+    Component(vendaRepository, "VendaRepository", "C# Repository, EF Core", "Acesso a dados de vendas e itens de venda")
+    Component(usuarioRepository, "UsuarioRepository", "C# Repository, EF Core", "Acesso a dados de usuários")
+}
+
+ContainerDb(db, "Banco de Dados", "SQL Server / PostgreSQL", "Armazena produtos, clientes, vendas e usuários")
+Person(usuario, "Usuário", "Responsável pela loja")
+
+Rel(usuario, razorViews, "Interage via navegador", "HTTPS")
+Rel(razorViews, produtoController, "Envia requisições de produtos")
+Rel(razorViews, clienteController, "Envia requisições de clientes")
+Rel(razorViews, vendaController, "Envia requisições de vendas")
+Rel(razorViews, authController, "Envia requisições de login")
+
+Rel(produtoController, produtoService, "Delega lógica de negócio")
+Rel(clienteController, clienteService, "Delega lógica de negócio")
+Rel(vendaController, vendaService, "Delega lógica de negócio")
+Rel(authController, authService, "Delega autenticação")
+
+Rel(vendaService, pagamentoStrategy, "Utiliza estratégia de pagamento")
+Rel(vendaService, produtoService, "Verifica e atualiza estoque")
+
+Rel(produtoService, produtoRepository, "Persiste e consulta dados")
+Rel(clienteService, clienteRepository, "Persiste e consulta dados")
+Rel(vendaService, vendaRepository, "Persiste e consulta dados")
+Rel(authService, usuarioRepository, "Consulta credenciais")
+
+Rel(produtoRepository, db, "Lê/escreve", "Entity Framework Core")
+Rel(clienteRepository, db, "Lê/escreve", "Entity Framework Core")
+Rel(vendaRepository, db, "Lê/escreve", "Entity Framework Core")
+Rel(usuarioRepository, db, "Lê/escreve", "Entity Framework Core")
+@enduml
+
+@startuml C4_Code
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_TOP_DOWN()
+
+title [Nível 4] Diagrama de Código - Models e Padrões de Projeto
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FEFECE
+    BorderColor #A80036
+    ArrowColor #A80036
+}
+
+class Produto {
+    +int Id
+    +string Nome
+    +string Descricao
+    +decimal Preco
+    +int QuantidadeEstoque
+}
+
+class Cliente {
+    +int Id
+    +string Nome
+    +string Email
+    +string Telefone
+    +string Endereco
+}
+
+class Venda {
+    +int Id
+    +int ClienteId
+    +DateTime DataVenda
+    +decimal ValorTotal
+    +string FormaPagamento
+}
+
+class ItemVenda {
+    +int Id
+    +int VendaId
+    +int ProdutoId
+    +int Quantidade
+    +decimal PrecoUnitario
+}
+
+class Usuario {
+    +int Id
+    +string Login
+    +string SenhaHash
+    +string Role
+}
+
+Venda "1" --> "1" Cliente : pertence a
+Venda "1" --> "*" ItemVenda : contém
+ItemVenda "*" --> "1" Produto : referencia
+
+interface IPagamentoStrategy {
+    +decimal Processar(decimal valor)
+}
+
+class PagamentoCartao implements IPagamentoStrategy {
+    +decimal Processar(decimal valor)
+}
+
+class PagamentoBoleto implements IPagamentoStrategy {
+    +decimal Processar(decimal valor)
+}
+
+class PagamentoPix implements IPagamentoStrategy {
+    +decimal Processar(decimal valor)
+}
+
+class VendaService {
+    -IPagamentoStrategy _pagamento
+    +RegistrarVenda(Venda venda)
+    +ValidarEstoque(List<ItemVenda> itens)
+    +AtualizarEstoque(List<ItemVenda> itens)
+}
+
+VendaService --> IPagamentoStrategy : usa (Strategy)
+VendaService --> Venda : cria
+VendaService --> Produto : atualiza estoque
+
+note right of VendaService
+  Padrão **Facade**: centraliza
+  toda a lógica de registro
+  de venda em um único serviço.
+end note
+
+note bottom of IPagamentoStrategy
+  Padrão **Strategy**: permite
+  trocar a forma de pagamento
+  em tempo de execução.
+end note
+
+@enduml

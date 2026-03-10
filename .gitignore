@@ -1,0 +1,68 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build Results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bin/
+obj/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Configuration Files
+appsettings.json
+appsettings.*.json
+
+# Logs
+*.log
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+*.generated.cs
+
+# Package directories
+node_modules/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Backup files
+*.bak
+*.swp
+
+# ReSharper
+_ReSharper*/
+*.DotSettings.user
+
+# Rider
+.idea/
+*.sln.iml
+
+# Code Coverage
+*.coverage
+*.coveragexml
+
+# Publish Output
+.publish/
+
+# NPM Packages
+node_modules/
+
+# Visual Studio Code
+.vscode/
