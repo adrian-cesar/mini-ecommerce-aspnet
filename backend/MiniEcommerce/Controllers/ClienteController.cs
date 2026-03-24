@@ -1,45 +1,45 @@
-ï»¿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using MiniEcommerce.Services;
 using MiniEcommerce.Dtos;
 
 namespace MiniEcommerce.Controllers
 {
     [ApiController]
-    [Route("produto")]
-    public class ProdutoController : ControllerBase
+    [Route("cliente")]
+    public class ClienteController : ControllerBase
     {
-        private readonly IProdutoService _service;
+        private readonly IClienteService _service;
 
-        public ProdutoController(IProdutoService service)
+        public ClienteController(IClienteService service)
         {
             _service = service;
         }
 
-        // Retorna todos os produtos.
+        // GET: Retorna todos os clientes
         [HttpGet]
         public IActionResult Get() => Ok(_service.GetAll());
 
-        // Retorna um produto pelo ID.
+        // GET: Retorna um cliente específico pelo ID
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
-            var produto = _service.GetById(id);
-            if (produto == null) return NotFound();
-            return Ok(produto);
+            var cliente = _service.GetById(id);
+            if (cliente == null) return NotFound();
+            return Ok(cliente);
         }
 
-        // Cria um novo produto.
+        // POST: Cria um novo cliente
         [HttpPost]
-        public IActionResult Post([FromBody] CreateProdutoDto dto)
+        public IActionResult Post([FromBody] CreateClienteDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
-            var produto = _service.Create(dto);
-            return CreatedAtAction(nameof(GetById), new { id = produto.Id }, produto);
+            var cliente = _service.Create(dto);
+            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, cliente);
         }
 
-        // Atualiza um produto existente.
+        // PUT: Atualiza um cliente existente
         [HttpPut("{id}")]
-        public IActionResult Put(int id, [FromBody] UpdateProdutoDto dto)
+        public IActionResult Put(int id, [FromBody] UpdateClienteDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var updated = _service.Update(id, dto);
@@ -47,7 +47,7 @@ namespace MiniEcommerce.Controllers
             return Ok(updated);
         }
 
-        // Remove um produto pelo ID.
+        // DELETE: Remove um cliente
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
