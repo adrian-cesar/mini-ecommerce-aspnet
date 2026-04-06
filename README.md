@@ -66,15 +66,15 @@ Framework para desenvolvimento de aplicações Web em C#.
 
 ---
 
-🔹 Razor (View Engine do ASP.NET Core)  
-Tecnologia utilizada para construção das páginas do sistema (front-end).  
-**Justificativa:** Permite integração direta com o backend mantendo arquitetura monolítica baseada em MVC.
+🔹 Next.js  
+Framework React para desenvolvimento de aplicações web com renderização híbrida (SSR e SSG).  
+**Justificativa:** Permite melhor desempenho, SEO otimizado e organização eficiente do frontend.
 
 ---
 
-🔹 Bootstrap  
-Framework CSS utilizado para estilização da interface.  
-**Justificativa:** Permite desenvolvimento rápido de interfaces responsivas e organizadas, melhorando a experiência do usuário.
+🔹 TypeScript  
+Superset do JavaScript com tipagem estática.  
+**Justificativa:** Ajuda a evitar erros, melhora a legibilidade do código e facilita a manutenção do projeto.
 
 ---
 
@@ -84,7 +84,7 @@ ORM para comunicação com banco de dados.
 
 ---
 
-🔹 SQL Server / PostgreSQL  
+🔹 PostgreSQL  
 Banco de dados relacional.  
 **Justificativa:** Armazenamento persistente, seguro e estruturado das informações do sistema.
 
