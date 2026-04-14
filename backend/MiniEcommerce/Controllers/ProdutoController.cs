@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MiniEcommerce.Services;
 using MiniEcommerce.Dtos;
 
@@ -6,6 +7,7 @@ namespace MiniEcommerce.Controllers
 {
     [ApiController]
     [Route("produto")]
+    [Authorize]
     public class ProdutoController : ControllerBase
     {
         private readonly IProdutoService _service;

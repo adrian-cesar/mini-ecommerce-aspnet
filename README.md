@@ -60,83 +60,132 @@ Essa organização garante separação de responsabilidades e melhor manutençã
 
 # 🛠 5. Tecnologias Utilizadas e Justificativas  
 
-🔹 ASP.NET Core  
+🔹 **ASP.NET Core**  
 Framework para desenvolvimento de aplicações Web em C#.  
 **Justificativa:** Framework moderno, robusto, multiplataforma e amplamente utilizado no mercado.
 
 ---
 
-🔹 Next.js  
+🔹 **Next.js**  
 Framework React para desenvolvimento de aplicações web com renderização híbrida (SSR e SSG).  
 **Justificativa:** Permite melhor desempenho, SEO otimizado e organização eficiente do frontend.
 
 ---
 
-🔹 TypeScript  
+🔹 **TypeScript**  
 Superset do JavaScript com tipagem estática.  
 **Justificativa:** Ajuda a evitar erros, melhora a legibilidade do código e facilita a manutenção do projeto.
 
 ---
 
-🔹 Entity Framework Core  
+🔹 **Entity Framework Core**  
 ORM para comunicação com banco de dados.  
 **Justificativa:** Permite mapear classes para tabelas de forma simples e organizada, facilitando persistência de dados.
 
 ---
 
-🔹 PostgreSQL  
+🔹 **PostgreSQL**  
 Banco de dados relacional.  
 **Justificativa:** Armazenamento persistente, seguro e estruturado das informações do sistema.
 
 ---
 
-🔹 JWT (Json Web Token)  
+🔹 **JWT (Json Web Token)**  
 Autenticação baseada em token.  
 **Justificativa:** Permite controle de acesso seguro às rotas protegidas da aplicação.
 
 ---
 
-🔹 xUnit  
+🔹 **xUnit**  
 Framework para testes unitários.  
 **Justificativa:** Garantir confiabilidade e validação das regras de negócio.
 
 ---
 
-🔹 Padrões de Projeto (GoF)
+🔹 **Moq**  
+Biblioteca de mock para testes unitários em .NET.  
+**Justificativa:** Permite simular dependências (repositórios/serviços) e isolar a lógica testada com xUnit.
+
+---
+
+🔹 **Padrões de Projeto (GoF)**
 
 Serão aplicados:
 
 - **Strategy** → Para implementação das diferentes formas de pagamento  
 - **Facade** → Centralização da lógica da venda no serviço responsável  
-- Singleton** → Utilização na configuração e injeção de dependências  
+- **Singleton** → Utilização na configuração e injeção de dependências  
 
-Justificativa:** Aplicação de boas práticas conforme literatura clássica de Engenharia de Software.
+**Justificativa:** Aplicação de boas práticas conforme literatura clássica de Engenharia de Software.
 
 ---
 
-🔄 6. Funcionalidades Principais  
+# 🔄 6. Funcionalidades Principais  
 
-✅ CRUD
+✅ **CRUD**
 - Produto  
 - Cliente  
 
-✅ Transação
+✅ **Transação**
 - Venda com validação de estoque e atualização automática  
 
 ---
 
-📅 7. Organização das Tarefas  
+# 📅 7. Organização das Tarefas  
 
-🔹 Adrian
+🔹 **Adrian**
 - Estrutura do projeto  
 - Backend (Controllers, Services, Repositories)  
 - Configuração do banco  
 - Implementação da autenticação JWT  
 - Implementação dos padrões de projeto  
 
-🔹 Renato
-- Desenvolvimento do Front-end (Razor + Bootstrap)  
+🔹 **Renato**
+- Desenvolvimento do Front-end 
 - Integração com a API  
 - Documentação  
 - Testes e validação  
 - Auxílio na modelagem do banco  
+
+---
+
+# ▶ 8. Como Rodar o Projeto
+
+Pré-requisitos:
+
+- .NET 8 SDK
+- Node.js 20+
+- PostgreSQL
+
+1. Instale e deixe o PostgreSQL rodando na porta `5432`.
+2. Confira se a conexão em [appsettings.json](backend/MiniEcommerce/appsettings.json) está correta.
+3. Ao subir o backend, o banco é criado e preenchido automaticamente com poucos dados de exemplo.
+
+1. Backend (Terminal 1)
+
+```bash
+cd backend/MiniEcommerce
+dotnet run
+```
+
+2. Frontend (Terminal 2)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+3. Acessos
+
+- API: http://localhost:5250
+- Frontend: http://localhost:3000
+
+---
+
+# 🧪 9. Como Rodar os Testes
+
+```bash
+cd backend
+dotnet test
+```
