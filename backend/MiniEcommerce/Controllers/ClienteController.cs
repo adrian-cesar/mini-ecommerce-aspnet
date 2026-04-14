@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MiniEcommerce.Services;
 using MiniEcommerce.Dtos;
 
@@ -6,6 +7,7 @@ namespace MiniEcommerce.Controllers
 {
     [ApiController]
     [Route("cliente")]
+    [Authorize]
     public class ClienteController : ControllerBase
     {
         private readonly IClienteService _service;
@@ -19,7 +21,7 @@ namespace MiniEcommerce.Controllers
         [HttpGet]
         public IActionResult Get() => Ok(_service.GetAll());
 
-        // GET: Retorna um cliente específico pelo ID
+        // GET: Retorna um cliente especï¿½fico pelo ID
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {

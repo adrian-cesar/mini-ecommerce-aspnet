@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MiniEcommerce.Services;
 using MiniEcommerce.Dtos;
 
@@ -6,6 +7,7 @@ namespace MiniEcommerce.Controllers
 {
     [ApiController]
     [Route("venda")]
+    [Authorize]
     public class VendaController : ControllerBase
     {
         private readonly IVendaService _service;
@@ -19,7 +21,7 @@ namespace MiniEcommerce.Controllers
         [HttpGet]
         public IActionResult Get() => Ok(_service.GetAll());
 
-        // GET: Retorna detalhes de uma venda específica
+        // GET: Retorna detalhes de uma venda especï¿½fica
         [HttpGet("{id}")]
         public IActionResult GetById(int id)
         {
