@@ -92,7 +92,7 @@ export default function SalesPage() {
     try {
       await createSale({
         clienteId: selectedClientId,
-        itensVenda: items.map((item) => ({
+        itens: items.map((item) => ({
           produtoId: item.produtoId,
           quantidade: item.quantidade,
         })),

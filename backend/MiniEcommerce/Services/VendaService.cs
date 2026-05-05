@@ -30,7 +30,7 @@ namespace MiniEcommerce.Services
             return _vendaRepository.GetAll();
         }
 
-        // Busca uma venda específica pelo ID.
+        // Busca uma venda especï¿½fica pelo ID.
         public Venda GetById(int id)
         {
             return _vendaRepository.GetById(id);
@@ -42,9 +42,9 @@ namespace MiniEcommerce.Services
             // Verifica se o cliente existe.
             var cliente = _clienteRepository.GetById(dto.ClienteId);
             if (cliente == null)
-                throw new Exception("Cliente não encontrado");
+                throw new Exception("Cliente nï¿½o encontrado");
 
-            // Verifica se há itens na venda.
+            // Verifica se hï¿½ itens na venda.
             if (dto.Itens == null || dto.Itens.Count == 0)
                 throw new Exception("Venda deve ter pelo menos um item");
 
@@ -57,11 +57,11 @@ namespace MiniEcommerce.Services
                 var produto = _produtoRepository.GetById(item.ProdutoId);
 
                 if (produto == null)
-                    throw new Exception($"Produto com ID {item.ProdutoId} não encontrado");
+                    throw new Exception($"Produto com ID {item.ProdutoId} nï¿½o encontrado");
 
-                // Confere estoque disponível.
+                // Confere estoque disponï¿½vel.
                 if (produto.Estoque < item.Quantidade)
-                    throw new Exception($"Estoque insuficiente para {produto.Nome}. Disponível: {produto.Estoque}");
+                    throw new Exception($"Estoque insuficiente para {produto.Nome}. Disponï¿½vel: {produto.Estoque}");
 
                 // Cria o item da venda.
                 var itemVenda = new ItemVenda
@@ -74,7 +74,7 @@ namespace MiniEcommerce.Services
                 total += produto.Preco * item.Quantidade;
             }
 
-            // Se tudo ok, grava a venda e atualiza o estoque dentro de uma transação.
+            // Se tudo ok, grava a venda e atualiza o estoque dentro de uma transaï¿½ï¿½o.
             using (var transaction = _context.Database.BeginTransaction())
             {
                 try
@@ -82,7 +82,7 @@ namespace MiniEcommerce.Services
                     var venda = new Venda
                     {
                         ClienteId = dto.ClienteId,
-                        Data = DateTime.Now,
+                        Data = DateTime.UtcNow,
                         Total = total,
                         ItensVenda = itensDaVenda
                     };

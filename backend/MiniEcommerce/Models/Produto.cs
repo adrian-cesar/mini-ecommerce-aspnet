@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MiniEcommerce.Models
 {
@@ -10,6 +11,7 @@ namespace MiniEcommerce.Models
         public int Estoque { get; set; }
         
         // Um produto pode estar em vários itens de venda
+        [JsonIgnore]
         public ICollection<ItemVenda> ItensVenda { get; set; } = new List<ItemVenda>();
     }
 }
