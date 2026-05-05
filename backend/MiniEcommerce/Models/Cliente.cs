@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MiniEcommerce.Models
 {
@@ -9,6 +10,7 @@ namespace MiniEcommerce.Models
         public string Email { get; set; }
         
         // Um cliente pode ter várias vendas
+        [JsonIgnore]
         public ICollection<Venda> Vendas { get; set; } = new List<Venda>();
     }
 }

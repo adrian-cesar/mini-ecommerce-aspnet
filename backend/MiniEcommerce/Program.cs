@@ -7,6 +7,18 @@ using MiniEcommerce.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configurar CORS para permitir requisições do frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -47,7 +59,8 @@ var app = builder.Build();
 
 // Inicializar banco de dados com dados de exemplo
 SeedData.InitializeDb(app);
-
+// Habilitar CORS
+app.UseCors("AllowFrontend");
 app.UseHttpsRedirection();
 
 // Adicionar autentica��o ANTES de autoriza��o

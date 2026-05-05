@@ -100,7 +100,7 @@ export interface Sale {
 
 export interface CreateSaleRequest {
   clienteId: number;
-  itensVenda: Array<{
+  itens: Array<{
     produtoId: number;
     quantidade: number;
   }>;

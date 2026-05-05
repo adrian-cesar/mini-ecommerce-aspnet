@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace MiniEcommerce.Models
 {
@@ -9,6 +10,7 @@ namespace MiniEcommerce.Models
         public int ClienteId { get; set; }
         
         // Referência do cliente que fez a venda
+        [JsonIgnore]
         public Cliente Cliente { get; set; }
         
         public DateTime Data { get; set; }

@@ -34,27 +34,32 @@ A cada venda realizada, o sistema deve verificar o estoque disponível e atualiz
 
 # 📋 3. Requisitos Não Funcionais (RNF)
 
-- **RNF01** – O sistema deve utilizar arquitetura MVC  
-- **RNF02** – O sistema deve ser uma aplicação web monolítica  
+- **RNF01** – O sistema deve utilizar backend em ASP.NET Core Web API  
+- **RNF02** – O sistema deve utilizar frontend em Next.js  
 - **RNF03** – O sistema deve utilizar autenticação via JWT  
 - **RNF04** – O sistema deve utilizar banco de dados relacional  
 - **RNF05** – O sistema deve possuir testes unitários básicos  
+- **RNF06** – O sistema deve possuir CI/CD para build e testes automatizados  
 
 ---
 
 # 🏗 4. Arquitetura  
 
-O sistema será desenvolvido utilizando **arquitetura monolítica** com padrão **MVC (Model-View-Controller)**.
+O sistema é composto por duas partes principais:
 
-### Separação em camadas:
+- **Backend**: ASP.NET Core Web API
+- **Frontend**: Next.js
+- **Banco de dados**: PostgreSQL
 
-- **Controllers** → Responsáveis pelas rotas e controle das requisições HTTP  
+### Separação em camadas do backend:
+
+- **Controllers** → Responsáveis pelas rotas e pelo tratamento das requisições HTTP  
 - **Services** → Implementação das regras de negócio  
 - **Repositories** → Camada de acesso ao banco de dados  
 - **Models** → Representação das entidades do sistema  
-- **Views (Razor)** → Camada de apresentação (interface com o usuário)  
+- **DTOs** → Objetos de transferência usados nas entradas e saídas da API  
 
-Essa organização garante separação de responsabilidades e melhor manutenção do sistema.
+Essa organização garante separação de responsabilidades e facilita manutenção e testes.
 
 ---
 
