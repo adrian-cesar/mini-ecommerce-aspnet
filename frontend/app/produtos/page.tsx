@@ -15,6 +15,8 @@ export default function ProductsPage() {
     preco: 0,
     estoque: 0,
     descricao: "",
+    categoria: "",
+    imagemUrl: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -49,6 +51,8 @@ export default function ProductsPage() {
       preco: product.preco,
       estoque: product.estoque,
       descricao: product.descricao || "",
+      categoria: product.categoria || "",
+      imagemUrl: product.imagemUrl || "",
     });
     setEditingId(product.id);
     setShowForm(true);
@@ -69,7 +73,7 @@ export default function ProductsPage() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ nome: "", preco: 0, estoque: 0, descricao: "" });
+    setFormData({ nome: "", preco: 0, estoque: 0, descricao: "", categoria: "", imagemUrl: "" });
     setFormError(null);
   };
 
@@ -158,15 +162,47 @@ export default function ProductsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
+                  Categoria
                 </label>
                 <input
                   type="text"
+                  value={formData.categoria || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, categoria: e.target.value })
+                  }
+                  disabled={isSubmitting}
+                  placeholder="Ex: Eletrônicos, Roupas..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+                </label>
+                <textarea
                   value={formData.descricao || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, descricao: e.target.value })
                   }
                   disabled={isSubmitting}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  URL da Imagem
+                </label>
+                <input
+                  type="url"
+                  value={formData.imagemUrl || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, imagemUrl: e.target.value })
+                  }
+                  disabled={isSubmitting}
+                  placeholder="https://exemplo.com/imagem.jpg"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                 />
               </div>
@@ -210,48 +246,78 @@ export default function ProductsPage() {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg shadow p-6 space-y-4"
+                className="bg-white rounded-lg shadow overflow-hidden"
               >
-                <h3 className="text-lg font-semibold text-gray-900">
-                  {product.nome}
-                </h3>
-                {product.descricao && (
-                  <p className="text-sm text-gray-600">{product.descricao}</p>
-                )}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Preço:</span>
-                    <span className="font-semibold text-gray-900">
-                      R$ {product.preco.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Estoque:</span>
-                    <span
-                      className={`font-semibold ${
-                        product.estoque > 0
-                          ? "text-green-600"
-                          : "text-red-600"
-                      }`}
-                    >
-                      {product.estoque}
-                    </span>
-                  </div>
+                {/* Product Image */}
+                <div className="w-full h-40 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                  {product.imagemUrl ? (
+                    <img
+                      src={product.imagemUrl}
+                      alt={product.nome}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-3xl">📦</span>
+                  )}
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
-                  >
-                    Editar
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
-                  >
-                    Deletar
-                  </button>
+                <div className="p-4 space-y-3">
+                  {/* Category Badge */}
+                  {product.categoria && (
+                    <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-semibold rounded">
+                      {product.categoria}
+                    </span>
+                  )}
+
+                  {/* Product Name */}
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {product.nome}
+                  </h3>
+
+                  {/* Description */}
+                  {product.descricao && (
+                    <p className="text-sm text-gray-600 line-clamp-2">
+                      {product.descricao}
+                    </p>
+                  )}
+
+                  {/* Price and Stock */}
+                  <div className="space-y-2 pt-2 border-t">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Preço:</span>
+                      <span className="font-semibold text-gray-900">
+                        R$ {product.preco.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Estoque:</span>
+                      <span
+                        className={`font-semibold ${
+                          product.estoque > 0
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {product.estoque}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      onClick={() => handleEdit(product)}
+                      className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product.id)}
+                      className="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+                    >
+                      Deletar
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

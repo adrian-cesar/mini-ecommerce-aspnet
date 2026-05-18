@@ -10,5 +10,8 @@ namespace MiniEcommerce.Dtos
         public decimal Preco { get; set; }
         [Range(0, int.MaxValue)]
         public int Estoque { get; set; }
+        public string Descricao { get; set; } = "";
+        public string Categoria { get; set; } = "";
+        public string ImagemUrl { get; set; } = "";
     }
 }

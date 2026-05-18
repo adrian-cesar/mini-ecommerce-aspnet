@@ -9,6 +9,9 @@ namespace MiniEcommerce.Models
         public string Nome { get; set; }
         public decimal Preco { get; set; }
         public int Estoque { get; set; }
+        public string Descricao { get; set; } = "";
+        public string Categoria { get; set; } = "";
+        public string ImagemUrl { get; set; } = "";
         
         // Um produto pode estar em vários itens de venda
         [JsonIgnore]

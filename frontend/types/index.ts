@@ -36,6 +36,8 @@ export interface Product {
   preco: number;
   estoque: number;
   descricao?: string;
+  categoria?: string;
+  imagemUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -45,6 +47,8 @@ export interface CreateProductRequest {
   preco: number;
   estoque: number;
   descricao?: string;
+  categoria?: string;
+  imagemUrl?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

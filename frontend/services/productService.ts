@@ -7,6 +7,8 @@ interface ProductApiResponse {
   preco: number;
   estoque: number;
   descricao?: string;
+  categoria?: string;
+  imagemUrl?: string;
 }
 
 const PRODUCTS_ENDPOINT = "/produto";
@@ -18,6 +20,8 @@ function mapToProduct(product: ProductApiResponse): Product {
     preco: Number(product.preco),
     estoque: product.estoque,
     descricao: product.descricao,
+    categoria: product.categoria,
+    imagemUrl: product.imagemUrl,
   };
 }
 

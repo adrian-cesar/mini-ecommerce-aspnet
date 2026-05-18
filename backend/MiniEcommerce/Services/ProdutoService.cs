@@ -33,12 +33,15 @@ namespace MiniEcommerce.Services
             {
                 Nome = dto.Nome,
                 Preco = dto.Preco,
-                Estoque = dto.Estoque
+                Estoque = dto.Estoque,
+                Descricao = dto.Descricao,
+                Categoria = dto.Categoria,
+                ImagemUrl = dto.ImagemUrl
             };
             return _repository.Add(produto);
         }
 
-        // Atualiza um produto existente; retorna null se n�o encontrar.
+        // Atualiza um produto existente; retorna null se não encontrar.
         public Produto Update(int id, UpdateProdutoDto dto)
         {
             var existente = _repository.GetById(id);
@@ -46,6 +49,9 @@ namespace MiniEcommerce.Services
             existente.Nome = dto.Nome;
             existente.Preco = dto.Preco;
             existente.Estoque = dto.Estoque;
+            existente.Descricao = dto.Descricao;
+            existente.Categoria = dto.Categoria;
+            existente.ImagemUrl = dto.ImagemUrl;
             _repository.Update(existente);
             return existente;
         }
