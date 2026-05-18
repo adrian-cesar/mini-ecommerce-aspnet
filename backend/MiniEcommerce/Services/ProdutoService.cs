@@ -38,7 +38,7 @@ namespace MiniEcommerce.Services
             return _repository.Add(produto);
         }
 
-        // Atualiza um produto existente; retorna null se não encontrar.
+        // Atualiza um produto existente; retorna null se nï¿½o encontrar.
         public Produto Update(int id, UpdateProdutoDto dto)
         {
             var existente = _repository.GetById(id);
