@@ -20,7 +20,7 @@ namespace MiniEcommerce.Services
             return _repository.GetAll();
         }
 
-        // Busca um cliente específico pelo ID.
+        // Busca um cliente especï¿½fico pelo ID.
         public Cliente GetById(int id)
         {
             return _repository.GetById(id);
@@ -53,6 +53,18 @@ namespace MiniEcommerce.Services
         public void Delete(int id)
         {
             _repository.Delete(id);
+        }
+
+        // Cria um cliente 'guest' temporÃ¡rio para uso na loja sem expor outros clientes.
+        public Cliente CreateGuest()
+        {
+            var unique = System.Guid.NewGuid().ToString().Split('-')[0];
+            var cliente = new Cliente
+            {
+                Nome = $"Guest {unique}",
+                Email = $"guest+{unique}@example.local"
+            };
+            return _repository.Add(cliente);
         }
     }
 }

@@ -39,6 +39,15 @@ namespace MiniEcommerce.Controllers
             return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, cliente);
         }
 
+        // POST: Cria/retorna um cliente 'guest' para uso público na loja
+        [HttpPost("guest")]
+        [AllowAnonymous]
+        public IActionResult CreateGuest()
+        {
+            var cliente = _service.CreateGuest();
+            return CreatedAtAction(nameof(GetById), new { id = cliente.Id }, cliente);
+        }
+
         // PUT: Atualiza um cliente existente
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] UpdateClienteDto dto)

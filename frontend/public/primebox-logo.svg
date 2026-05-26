@@ -1,0 +1,57 @@
+<svg width="100%" viewBox="0 0 690 340" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>Logo PrimeBox</title>
+  <defs>
+    <mask id="imagine-text-gaps-tcfcka" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="690" height="340" fill="white"/><rect x="86.36000061035156" y="120.4000015258789" width="597.6500244140625" height="139.1999969482422" fill="black" rx="2"/><rect x="256" y="117.4000015258789" width="364.3000183105469" height="139.1999969482422" fill="black" rx="2"/><rect x="442.6499938964844" y="117.4000015258789" width="241.35000610351562" height="139.1999969482422" fill="black" rx="2"/><rect x="248.21875" y="234.8000030517578" width="183.5625" height="17.600000381469727" fill="black" rx="2"/></mask>
+  </defs>
+
+  <!-- Face lateral direita (sombra) -->
+  <polygon points="370,88 420,116 420,186 370,158" fill="#1a1220"/>
+
+  <!-- Face frontal -->
+  <polygon points="320,88 370,116 370,186 320,158" fill="#2d1f3d"/>
+
+  <!-- Face superior -->
+  <polygon points="345,68 395,96 370,110 320,82" fill="#4a3570"/>
+
+  <!-- Tampa esquerda (aberta) -->
+  <polygon points="320,82 345,68 340,55 315,69" fill="#6e52a8"/>
+
+  <!-- Tampa direita (aberta) -->
+  <polygon points="395,96 370,110 365,97 390,83" fill="#9b7fd4"/>
+
+  <!-- Faixa vermelha frontal -->
+  <polygon points="341,88 352,94 352,186 341,180" fill="#E24B4A"/>
+
+  <!-- Faixa vermelha lateral -->
+  <polygon points="370,116 381,110 381,180 370,186" fill="#A32D2D"/>
+
+  <!-- Brilho no canto superior esquerdo da face frontal -->
+  <polygon points="320,88 330,93 330,100 320,95" fill="#6e52a8" opacity="0.5"/>
+
+  <!-- Ponto de luz no topo -->
+  <circle cx="357" cy="87" r="4" fill="#FAC775" opacity="0.9"/>
+  <circle cx="357" cy="87" r="7" fill="#FAC775" opacity="0.25"/>
+
+  <!-- Sombra sutil do texto -->
+  <text x="90.36" y="228" font-family="'Bebas Neue', 'Barlow Condensed', sans-serif" font-size="96" font-weight="900" fill="#1a1220" letter-spacing="3" opacity="0.18">PRIMEBOX</text>
+
+  <!-- Texto PRIME -->
+  <text x="260" y="225" font-family="'Bebas Neue', 'Barlow Condensed', sans-serif" font-size="96" font-weight="900" fill="#2d1f3d" letter-spacing="3">PRIME</text>
+
+  <!-- Texto BOX em vermelho -->
+  <text x="446.65" y="225" font-family="'Bebas Neue', 'Barlow Condensed', sans-serif" font-size="96" font-weight="900" fill="#E24B4A" letter-spacing="3">BOX</text>
+
+  <!-- Linha decorativa esquerda -->
+  <line x1="180" y1="241" x2="255" y2="241" stroke="#4a3570" stroke-width="1.5" stroke-linecap="round" mask="url(#imagine-text-gaps-tcfcka)"/>
+
+  <!-- Tagline -->
+  <text x="340" y="248" font-family="'Barlow Condensed', 'Bebas Neue', sans-serif" font-size="12" font-weight="700" fill="#9b7fd4" letter-spacing="7" text-anchor="middle">LOJA PREMIUM</text>
+
+  <!-- Linha decorativa direita -->
+  <line x1="425" y1="241" x2="500" y2="241" stroke="#E24B4A" stroke-width="1.5" stroke-linecap="round" mask="url(#imagine-text-gaps-tcfcka)"/>
+
+  <!-- Ponto decorativo esquerdo -->
+  <circle cx="175" cy="241" r="3" fill="#4a3570"/>
+  <!-- Ponto decorativo direito -->
+  <circle cx="505" cy="241" r="3" fill="#E24B4A"/>
+</svg>

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Mini Ecommerce | Sistema de Gerenciamento",
-  description: "Frontend profissional para mini e-commerce integrado com ASP.NET Core",
+  title: "PrimeBox | Loja Premium",
+  description: "A loja premium com os melhores produtos e preços.",
 };
 
 export default function RootLayout({

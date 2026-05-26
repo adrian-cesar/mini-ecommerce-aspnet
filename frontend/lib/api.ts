@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5250";
 
 export class ApiError extends Error {
   constructor(
@@ -62,6 +62,23 @@ export async function apiFetch<T>(
       message = payload.message ?? payload.title ?? message;
     } catch {
       // Keep fallback message when API does not return JSON
+    }
+
+    // If unauthorized, clear stored token and retry once without Authorization
+    if (response.status === 401) {
+      clearAuthToken();
+
+      // Retry once without Authorization header
+      const retryHeaders = { ...headers };
+      delete retryHeaders.Authorization;
+
+      const retryResp = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...init,
+        headers: retryHeaders,
+        cache: "no-store",
+      }).catch(() => null);
+
+      if (retryResp && retryResp.ok) return (await retryResp.json()) as T;
     }
 
     throw new ApiError(message, response.status);

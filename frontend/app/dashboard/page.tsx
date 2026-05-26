@@ -100,16 +100,15 @@ export default function DashboardPage() {
 
   const topProducts = useMemo(() => {
     if (!sales || !Array.isArray(sales)) return [];
-    
-    const productSales: Record<string, { nome: string; quantidade: number }> =
-      {};
+
+    const productSales: Record<string, { nome: string; quantidade: number }> = {};
 
     sales.forEach((sale) => {
       if (!sale || !Array.isArray(sale.itensVenda)) return;
-      
+
       sale.itensVenda.forEach((item) => {
         if (!item) return;
-        
+
         const key = item.produtoId.toString();
         const product = products.find((p) => p && p.id === item.produtoId);
         if (product) {
@@ -135,25 +134,25 @@ export default function DashboardPage() {
       label: "Receita Total",
       value: formatCurrency(metrics.totalRevenue),
       icon: "💰",
-      gradient: "from-sky-500 to-cyan-500",
+      gradient: "linear-gradient(135deg, #E24B4A 0%, #A32D2D 100%)",
     },
     {
       label: "Itens Vendidos",
       value: metrics.totalItemsSold,
       icon: "📦",
-      gradient: "from-emerald-500 to-teal-500",
+      gradient: "linear-gradient(135deg, #4a3570 0%, #2d1f3d 100%)",
     },
     {
       label: "Ticket Médio",
       value: formatCurrency(metrics.averageTicket),
       icon: "📊",
-      gradient: "from-violet-500 to-purple-500",
+      gradient: "linear-gradient(135deg, #6e52a8 0%, #4a3570 100%)",
     },
     {
       label: "Produtos Ativos",
       value: `${metrics.activeProducts}/${products.length}`,
       icon: "✅",
-      gradient: "from-amber-500 to-orange-500",
+      gradient: "linear-gradient(135deg, #FAC775 0%, #e8a830 100%)",
     },
   ];
 
@@ -175,9 +174,11 @@ export default function DashboardPage() {
     <DashboardLayout>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-gray-600 mt-2">
-            Bem-vindo ao sistema de gerenciamento
+          <h1 className="text-3xl font-bold" style={{ color: "#1a1220" }}>
+            Dashboard
+          </h1>
+          <p className="mt-2" style={{ color: "#6e52a8" }}>
+            Bem-vindo ao painel PrimeBox
           </p>
         </div>
 
@@ -186,11 +187,12 @@ export default function DashboardPage() {
             {alerts.map((alert, idx) => (
               <div
                 key={idx}
-                className={`p-4 rounded-lg ${
+                className="p-4 rounded-lg border text-sm font-medium"
+                style={
                   alert.type === "error"
-                    ? "bg-red-50 text-red-800 border border-red-200"
-                    : "bg-yellow-50 text-yellow-800 border border-yellow-200"
-                }`}
+                    ? { background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }
+                    : { background: "#fffbeb", borderColor: "#FAC775", color: "#92640a" }
+                }
               >
                 {alert.message}
               </div>
@@ -198,11 +200,13 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {kpiCards.map((card, idx) => (
             <div
               key={idx}
-              className={`bg-gradient-to-br ${card.gradient} rounded-lg shadow-lg p-6 text-white`}
+              className="rounded-xl shadow-lg p-6 text-white"
+              style={{ background: card.gradient }}
             >
               <div className="flex justify-between items-start">
                 <div>
@@ -215,30 +219,28 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow p-6" style={{ border: "1px solid #e8e2f4" }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: "#2d1f3d" }}>
               Receita (Últimos 7 Dias)
             </h2>
             <div className="space-y-2">
               {last7DaysSalesData.map((day, idx) => (
                 <div key={idx} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-gray-600 w-12">
+                  <span className="text-sm font-medium w-12" style={{ color: "#6e52a8" }}>
                     {day.label}
                   </span>
-                  <div className="flex-1 bg-gray-200 rounded-full h-6 overflow-hidden">
+                  <div className="flex-1 rounded-full h-6 overflow-hidden" style={{ background: "#f0ecfa" }}>
                     <div
-                      className="bg-gradient-to-r from-sky-500 to-cyan-500 h-full transition-all duration-300"
+                      className="h-full transition-all duration-300 rounded-full"
                       style={{
-                        width: `${
-                          maxRevenueDay > 0
-                            ? (day.total / maxRevenueDay) * 100
-                            : 0
-                        }%`,
+                        width: `${maxRevenueDay > 0 ? (day.total / maxRevenueDay) * 100 : 0}%`,
+                        background: "linear-gradient(90deg, #E24B4A 0%, #6e52a8 100%)",
                       }}
                     />
                   </div>
-                  <span className="text-sm font-semibold text-gray-900 w-20 text-right">
+                  <span className="text-sm font-semibold w-20 text-right" style={{ color: "#1a1220" }}>
                     {formatCurrency(day.total)}
                   </span>
                 </div>
@@ -246,25 +248,28 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow p-6" style={{ border: "1px solid #e8e2f4" }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: "#2d1f3d" }}>
               Distribuição por Categoria
             </h2>
             <div className="space-y-3">
               {categoryDistribution.map((cat, idx) => (
                 <div key={idx}>
                   <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium" style={{ color: "#4a3570" }}>
                       {cat.category}
                     </span>
-                    <span className="text-sm font-semibold text-gray-900">
+                    <span className="text-sm font-semibold" style={{ color: "#1a1220" }}>
                       {cat.percentage.toFixed(0)}%
                     </span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full rounded-full h-2" style={{ background: "#f0ecfa" }}>
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-teal-500 h-full rounded-full transition-all duration-300"
-                      style={{ width: `${cat.percentage}%` }}
+                      className="h-full rounded-full transition-all duration-300"
+                      style={{
+                        width: `${cat.percentage}%`,
+                        background: "linear-gradient(90deg, #4a3570 0%, #9b7fd4 100%)",
+                      }}
                     />
                   </div>
                 </div>
@@ -273,9 +278,10 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Bottom Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow p-6" style={{ border: "1px solid #e8e2f4" }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: "#2d1f3d" }}>
               Top 5 Produtos
             </h2>
             <div className="space-y-3">
@@ -283,31 +289,35 @@ export default function DashboardPage() {
                 topProducts.map((product, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 rounded-lg"
+                    style={{ background: "#f5f3fa" }}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gradient-to-r from-violet-500 to-purple-500 text-white text-sm font-bold">
+                      <span
+                        className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-sm font-bold"
+                        style={{ background: idx === 0 ? "#E24B4A" : "#4a3570" }}
+                      >
                         {idx + 1}
                       </span>
-                      <span className="font-medium text-gray-900">
+                      <span className="font-medium" style={{ color: "#1a1220" }}>
                         {product.nome}
                       </span>
                     </div>
-                    <span className="font-semibold text-gray-900">
+                    <span className="font-semibold" style={{ color: "#6e52a8" }}>
                       {product.quantidade}x
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">
+                <p className="text-center py-4" style={{ color: "#9b7fd4" }}>
                   Sem vendas ainda
                 </p>
               )}
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          <div className="bg-white rounded-xl shadow p-6" style={{ border: "1px solid #e8e2f4" }}>
+            <h2 className="text-lg font-semibold mb-4" style={{ color: "#2d1f3d" }}>
               Vendas Recentes
             </h2>
             <div className="space-y-2">
@@ -315,23 +325,24 @@ export default function DashboardPage() {
                 recentSales.map((sale, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center justify-between p-3 rounded-lg"
+                    style={{ background: "#f5f3fa" }}
                   >
                     <div>
-                      <p className="font-medium text-gray-900">
+                      <p className="font-medium" style={{ color: "#1a1220" }}>
                         {sale.cliente?.nome || "Cliente"}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs" style={{ color: "#9b7fd4" }}>
                         {formatDateLabel(sale.dataVenda)}
                       </p>
                     </div>
-                    <span className="font-semibold text-emerald-600">
+                    <span className="font-semibold" style={{ color: "#E24B4A" }}>
                       {formatCurrency(sale.total)}
                     </span>
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">
+                <p className="text-center py-4" style={{ color: "#9b7fd4" }}>
                   Sem vendas ainda
                 </p>
               )}
@@ -339,32 +350,37 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+        {/* Quick Links */}
+        <div className="bg-white rounded-xl shadow p-6" style={{ border: "1px solid #e8e2f4" }}>
+          <h2 className="text-lg font-semibold mb-4" style={{ color: "#2d1f3d" }}>
             Atalhos Rápidos
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="/produtos"
-              className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">📦</div>
-              <p className="font-medium text-gray-900">Gerenciar Produtos</p>
-            </a>
-            <a
-              href="/clientes"
-              className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">👥</div>
-              <p className="font-medium text-gray-900">Gerenciar Clientes</p>
-            </a>
-            <a
-              href="/vendas"
-              className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow text-center"
-            >
-              <div className="text-2xl mb-2">💳</div>
-              <p className="font-medium text-gray-900">Ver Vendas</p>
-            </a>
+            {[
+              { href: "/produtos", icon: "📦", label: "Gerenciar Produtos" },
+              { href: "/clientes", icon: "👥", label: "Gerenciar Clientes" },
+              { href: "/vendas", icon: "💳", label: "Ver Vendas" },
+            ].map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="p-4 rounded-lg text-center transition-all hover:shadow-md"
+                style={{ border: "2px solid #e8e2f4" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#E24B4A";
+                  e.currentTarget.style.background = "#fff5f5";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e2f4";
+                  e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <div className="text-2xl mb-2">{link.icon}</div>
+                <p className="font-medium" style={{ color: "#2d1f3d" }}>
+                  {link.label}
+                </p>
+              </a>
+            ))}
           </div>
         </div>
       </div>

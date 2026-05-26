@@ -44,6 +44,13 @@ export const clientService = {
     return mapToClient(data);
   },
 
+  async createGuest(): Promise<Client> {
+    const data = await apiFetch<ClientApiResponse>(`${CLIENTS_ENDPOINT}/guest`, {
+      method: "POST",
+    });
+    return mapToClient(data);
+  },
+
   async update(id: number, request: UpdateClientRequest): Promise<Client> {
     const data = await apiFetch<ClientApiResponse>(
       `${CLIENTS_ENDPOINT}/${id}`,

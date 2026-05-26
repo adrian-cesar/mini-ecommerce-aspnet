@@ -22,10 +22,28 @@ namespace MiniEcommerce.Data
                 {
                     context.Database.Migrate();
 
-                    // Se já tem dados, não adiciona novamente
+                    // Se já tem dados, não adiciona novamente, porém corrige estoques zerados (hotfix dev)
                     if (context.Produtos.Any() || context.Clientes.Any() || context.Vendas.Any())
                     {
                         Console.WriteLine("Banco de dados já está populado.");
+
+                        // Hotfix: se algum produto estiver com estoque 0 (devido a testes), restaura valores seed mínimos
+                        var needsRestore = context.Produtos.Any(p => p.Estoque == 0);
+                        if (needsRestore)
+                        {
+                            Console.WriteLine("Restaurando estoques para valores seed (hotfix)...");
+                            var notebook = context.Produtos.FirstOrDefault(p => p.Nome == "Notebook Dell Inspiron");
+                            if (notebook != null) notebook.Estoque = 5;
+                            var mouse = context.Produtos.FirstOrDefault(p => p.Nome == "Mouse Logitech MX Master");
+                            if (mouse != null) mouse.Estoque = 20;
+                            var iphone = context.Produtos.FirstOrDefault(p => p.Nome == "Iphone 15 PRO MAX");
+                            if (iphone != null) iphone.Estoque = 3;
+                            var camiseta = context.Produtos.FirstOrDefault(p => p.Nome == "Camiseta \"Barra Ahlma\" Preta Estonada");
+                            if (camiseta != null) camiseta.Estoque = 1;
+                            context.SaveChanges();
+                            Console.WriteLine("Estoques restaurados.");
+                        }
+
                         return;
                     }
 

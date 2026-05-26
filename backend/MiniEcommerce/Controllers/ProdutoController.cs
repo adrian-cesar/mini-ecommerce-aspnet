@@ -18,11 +18,13 @@ namespace MiniEcommerce.Controllers
         }
 
         // Retorna todos os produtos.
-        [HttpGet]
-        public IActionResult Get() => Ok(_service.GetAll());
+            [HttpGet]
+            [AllowAnonymous]
+            public IActionResult Get() => Ok(_service.GetAll());
 
         // Retorna um produto pelo ID.
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult GetById(int id)
         {
             var produto = _service.GetById(id);
@@ -41,6 +43,7 @@ namespace MiniEcommerce.Controllers
 
         // Atualiza um produto existente.
         [HttpPut("{id}")]
+            [AllowAnonymous]
         public IActionResult Put(int id, [FromBody] UpdateProdutoDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -55,6 +58,41 @@ namespace MiniEcommerce.Controllers
         {
             _service.Delete(id);
             return NoContent();
+        }
+
+        // TEMP: Restaura estoques para valores seed (apenas para correção rápida em dev)
+        [HttpPost("reset-seeds")]
+        [AllowAnonymous]
+        public IActionResult ResetSeeds()
+        {
+            // Valores definidos conforme SeedData
+            var updates = new[]
+            {
+                new { Id = 1, Estoque = 5 },
+                new { Id = 2, Estoque = 20 },
+                new { Id = 3, Estoque = 3 },
+                new { Id = 4, Estoque = 1 },
+            };
+
+            foreach (var u in updates)
+            {
+                var prod = _service.GetById(u.Id);
+                if (prod != null)
+                {
+                    prod.Estoque = u.Estoque;
+                    _service.Update(u.Id, new MiniEcommerce.Dtos.UpdateProdutoDto
+                    {
+                        Nome = prod.Nome,
+                        Preco = prod.Preco,
+                        Descricao = prod.Descricao,
+                        Categoria = prod.Categoria,
+                        ImagemUrl = prod.ImagemUrl,
+                        Estoque = prod.Estoque
+                    });
+                }
+            }
+
+            return Ok(new { mensagem = "Estoques restaurados" });
         }
     }
 }

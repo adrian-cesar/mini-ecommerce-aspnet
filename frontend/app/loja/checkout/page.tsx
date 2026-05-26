@@ -5,24 +5,27 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useClients } from "@/hooks/useClients";
 import { useSales } from "@/hooks/useSales";
-import { Navbar } from "@/components/Navbar";
+import { LojaHeader } from "@/components/LojaHeader";
 import { emitDataRefresh } from "@/lib/dataRefresh";
+
+const steps = [
+  { key: "cart", label: "Carrinho" },
+  { key: "client", label: "Cliente" },
+  { key: "payment", label: "Pagamento" },
+  { key: "success", label: "Concluído" },
+] as const;
+
+type Step = (typeof steps)[number]["key"];
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCart();
-  const { clients, createClient } = useClients();
+  const { createClient, createGuest } = useClients();
   const { createSale } = useSales();
 
-  const [step, setStep] = useState<"cart" | "client" | "payment" | "success">(
-    "cart"
-  );
+  const [step, setStep] = useState<Step>("cart");
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [newClient, setNewClient] = useState({
-    nome: "",
-    email: "",
-    telefone: "",
-  });
+  const [newClient, setNewClient] = useState({ nome: "", email: "", telefone: "" });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +44,7 @@ export default function CheckoutPage() {
       const client = await createClient(newClient);
       setSelectedClientId(client.id);
       setNewClient({ nome: "", email: "", telefone: "" });
+      setIsProcessing(false);
       setStep("payment");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao criar cliente");
@@ -48,23 +52,23 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleSelectClient = () => {
-    if (!selectedClientId) {
-      setError("Selecione um cliente");
-      return;
-    }
-    setStep("payment");
-  };
-
   const handleFinalizePurchase = async () => {
     setIsProcessing(true);
     setError(null);
 
     try {
-      if (!selectedClientId) {
-        setError("Cliente não selecionado");
-        setIsProcessing(false);
-        return;
+      let clientId = selectedClientId;
+
+      if (!clientId) {
+        try {
+          const guest = await createGuest();
+          clientId = guest.id;
+          setSelectedClientId(guest.id);
+        } catch {
+          setError("Cliente não selecionado e não foi possível criar convidado");
+          setIsProcessing(false);
+          return;
+        }
       }
 
       if (items.length === 0) {
@@ -73,34 +77,20 @@ export default function CheckoutPage() {
         return;
       }
 
-      console.log("Iniciando criação de venda com dados:", {
-        clienteId: selectedClientId,
-        itens: items.map((item) => ({
-          produtoId: item.product.id,
-          quantidade: item.quantity,
-        })),
-      });
-
-      // Create sale
       await createSale({
-        clienteId: selectedClientId,
+        clienteId: clientId,
         itens: items.map((item) => ({
           produtoId: item.product.id,
           quantidade: item.quantity,
         })),
       });
 
-      console.log("Venda criada com sucesso!");
-
-      // Clear cart and emit refresh
       clearCart();
       emitDataRefresh();
-
       setStep("success");
 
-      // Redirect after 3 seconds
       setTimeout(() => {
-        router.push("/loja");
+        router.push("/dashboard");
       }, 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao finalizar compra";
@@ -110,16 +100,21 @@ export default function CheckoutPage() {
     }
   };
 
+  const currentStepIdx = steps.findIndex((s) => s.key === step);
+
   if (items.length === 0 && step !== "success") {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <div className="max-w-2xl mx-auto px-4 py-12">
+      <div className="min-h-screen flex flex-col" style={{ background: "#f5f3fa" }}>
+        <LojaHeader />
+        <div className="flex-1 max-w-2xl mx-auto px-4 py-12 w-full">
           <div className="text-center">
-            <p className="text-gray-600 text-lg mb-4">Seu carrinho está vazio</p>
+            <p className="text-lg mb-4" style={{ color: "#6e52a8" }}>
+              Seu carrinho está vazio
+            </p>
             <button
               onClick={() => router.push("/loja")}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 rounded-lg text-white font-medium"
+              style={{ background: "#E24B4A" }}
             >
               Voltar para a loja
             </button>
@@ -130,36 +125,41 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
+    <div className="min-h-screen flex flex-col" style={{ background: "#f5f3fa" }}>
+      <LojaHeader />
 
-      <main className="max-w-4xl mx-auto px-4 py-12">
+      <main className="flex-1 max-w-4xl mx-auto px-4 py-12 w-full">
         {/* Progress Steps */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-8">
-            {[
-              { key: "cart", label: "Carrinho" },
-              { key: "client", label: "Cliente" },
-              { key: "payment", label: "Pagamento" },
-              { key: "success", label: "Concluído" },
-            ].map((s, idx, arr) => (
-              <div key={s.key} className="flex items-center">
-                <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                    step === s.key || arr.indexOf(arr.find((x) => x.key === step)!) < idx
-                      ? "bg-blue-600 text-white"
-                      : "bg-gray-300 text-gray-600"
-                  }`}
-                >
-                  {idx + 1}
-                </div>
-                {idx < arr.length - 1 && (
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            {steps.map((s, idx) => (
+              <div key={s.key} className="flex items-center flex-1">
+                <div className="flex flex-col items-center">
                   <div
-                    className={`flex-1 h-1 mx-4 ${
-                      arr.indexOf(arr.find((x) => x.key === step)!) < idx
-                        ? "bg-blue-600"
-                        : "bg-gray-300"
-                    }`}
+                    className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm"
+                    style={
+                      idx <= currentStepIdx
+                        ? { background: "#E24B4A", color: "#ffffff" }
+                        : { background: "#e8e2f4", color: "#9b7fd4" }
+                    }
+                  >
+                    {idx + 1}
+                  </div>
+                  <span
+                    className="text-xs mt-1 font-medium hidden sm:block"
+                    style={{ color: idx <= currentStepIdx ? "#E24B4A" : "#9b7fd4" }}
+                  >
+                    {s.label}
+                  </span>
+                </div>
+                {idx < steps.length - 1 && (
+                  <div
+                    className="flex-1 h-1 mx-2"
+                    style={{
+                      background: idx < currentStepIdx
+                        ? "linear-gradient(90deg, #E24B4A, #6e52a8)"
+                        : "#e8e2f4",
+                    }}
                   />
                 )}
               </div>
@@ -167,20 +167,23 @@ export default function CheckoutPage() {
           </div>
         </div>
 
-        {/* Success State */}
+        {/* Success */}
         {step === "success" && (
-          <div className="bg-white rounded-lg shadow p-12 text-center">
+          <div
+            className="bg-white rounded-xl shadow p-12 text-center"
+            style={{ border: "1px solid #e8e2f4" }}
+          >
             <div className="text-5xl mb-4">✅</div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-bold mb-2" style={{ color: "#1a1220" }}>
               Compra Finalizada!
             </h1>
-            <p className="text-gray-600 mb-4">
-              Sua compra foi registrada com sucesso. Você será redirecionado em
-              breve...
+            <p className="mb-6" style={{ color: "#6e52a8" }}>
+              Sua compra foi registrada com sucesso. Redirecionando em breve...
             </p>
             <button
               onClick={() => router.push("/loja")}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2 rounded-lg text-white font-medium"
+              style={{ background: "#E24B4A" }}
             >
               Voltar para a loja
             </button>
@@ -190,33 +193,37 @@ export default function CheckoutPage() {
         {/* Cart Step */}
         {step === "cart" && (
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">Seu Carrinho</h1>
+            <h1 className="text-3xl font-bold" style={{ color: "#1a1220" }}>
+              Seu Carrinho
+            </h1>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-6">
-                <div className="space-y-4">
-                  {items.map((item) => (
-                    <div
-                      key={item.product.id}
-                      className="flex justify-between items-center p-4 border border-gray-200 rounded-lg"
-                    >
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {item.product.nome}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Quantidade: {item.quantity}
-                        </p>
-                      </div>
-                      <span className="text-lg font-bold text-blue-600">
-                        R$ {(item.product.preco * item.quantity).toFixed(2)}
-                      </span>
+            <div
+              className="bg-white rounded-xl shadow overflow-hidden"
+              style={{ border: "1px solid #e8e2f4" }}
+            >
+              <div className="p-6 space-y-3">
+                {items.map((item) => (
+                  <div
+                    key={item.product.id}
+                    className="flex justify-between items-center p-4 rounded-lg"
+                    style={{ border: "1px solid #f0ecfa" }}
+                  >
+                    <div>
+                      <h3 className="font-semibold" style={{ color: "#1a1220" }}>
+                        {item.product.nome}
+                      </h3>
+                      <p className="text-sm" style={{ color: "#9b7fd4" }}>
+                        Quantidade: {item.quantity}
+                      </p>
                     </div>
-                  ))}
-                </div>
+                    <span className="text-lg font-bold" style={{ color: "#E24B4A" }}>
+                      R$ {(item.product.preco * item.quantity).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
 
-                <div className="mt-6 pt-6 border-t-2 text-right">
-                  <div className="text-2xl font-bold text-gray-900">
+                <div className="pt-4 text-right" style={{ borderTop: "2px solid #f0ecfa", marginTop: "8px" }}>
+                  <div className="text-2xl font-bold" style={{ color: "#1a1220" }}>
                     Total: R$ {total.toFixed(2)}
                   </div>
                 </div>
@@ -224,21 +231,36 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700">{error}</p>
+              <div
+                className="p-4 rounded-lg border text-sm"
+                style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+              >
+                {error}
               </div>
             )}
 
             <div className="flex gap-4">
               <button
                 onClick={() => router.push("/loja")}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-6 py-2 rounded-lg font-medium transition-colors"
+                style={{ border: "2px solid #e8e2f4", color: "#4a3570" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#6e52a8";
+                  e.currentTarget.style.background = "#f0ecfa";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e2f4";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
                 Voltar
               </button>
               <button
                 onClick={() => setStep("client")}
-                className="flex-1 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="flex-1 px-6 py-2 rounded-lg font-medium text-white"
+                style={{ background: "#E24B4A" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#A32D2D")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#E24B4A")}
               >
                 Continuar
               </button>
@@ -249,100 +271,74 @@ export default function CheckoutPage() {
         {/* Client Step */}
         {step === "client" && (
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-bold" style={{ color: "#1a1220" }}>
               Quem você é?
             </h1>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700">{error}</p>
+              <div
+                className="p-4 rounded-lg border text-sm"
+                style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+              >
+                {error}
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Existing Client */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Cliente Existente
-                </h2>
-                <select
-                  value={selectedClientId || ""}
-                  onChange={(e) =>
-                    setSelectedClientId(
-                      e.target.value ? parseInt(e.target.value) : null
-                    )
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
-                >
-                  <option value="">-- Selecione um cliente --</option>
-                  {clients.map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.nome} ({client.email})
-                    </option>
-                  ))}
-                </select>
+            <div
+              className="bg-white rounded-xl shadow p-6"
+              style={{ border: "1px solid #e8e2f4" }}
+            >
+              <h2 className="text-lg font-semibold mb-4" style={{ color: "#1a1220" }}>
+                Seus dados
+              </h2>
+              <form onSubmit={handleCreateClient} className="space-y-3">
+                {[
+                  { type: "text", placeholder: "Nome", key: "nome", required: true },
+                  { type: "email", placeholder: "Email", key: "email", required: true },
+                  { type: "tel", placeholder: "Telefone (opcional)", key: "telefone", required: false },
+                ].map((field) => (
+                  <input
+                    key={field.key}
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    value={newClient[field.key as keyof typeof newClient]}
+                    onChange={(e) =>
+                      setNewClient({ ...newClient, [field.key]: e.target.value })
+                    }
+                    disabled={isProcessing}
+                    className="w-full px-3 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                    style={{ border: "2px solid #e8e2f4", color: "#1a1220" }}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                    required={field.required}
+                  />
+                ))}
                 <button
-                  onClick={handleSelectClient}
-                  disabled={isProcessing || !selectedClientId}
-                  className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:opacity-50"
+                  type="submit"
+                  disabled={isProcessing}
+                  className="w-full px-4 py-2.5 rounded-lg font-medium text-white disabled:opacity-50 transition-colors"
+                  style={{ background: "#4a3570" }}
+                  onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = "#2d1f3d"; }}
+                  onMouseLeave={(e) => { if (!isProcessing) e.currentTarget.style.background = "#4a3570"; }}
                 >
-                  Continuar com este cliente
+                  {isProcessing ? "Salvando..." : "Continuar"}
                 </button>
-              </div>
-
-              {/* New Client */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                  Novo Cliente
-                </h2>
-                <form onSubmit={handleCreateClient} className="space-y-3">
-                  <input
-                    type="text"
-                    placeholder="Nome"
-                    value={newClient.nome}
-                    onChange={(e) =>
-                      setNewClient({ ...newClient, nome: e.target.value })
-                    }
-                    disabled={isProcessing}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    value={newClient.email}
-                    onChange={(e) =>
-                      setNewClient({ ...newClient, email: e.target.value })
-                    }
-                    disabled={isProcessing}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    required
-                  />
-                  <input
-                    type="tel"
-                    placeholder="Telefone (opcional)"
-                    value={newClient.telefone}
-                    onChange={(e) =>
-                      setNewClient({ ...newClient, telefone: e.target.value })
-                    }
-                    disabled={isProcessing}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isProcessing}
-                    className="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
-                  >
-                    {isProcessing ? "Criando..." : "Criar cliente"}
-                  </button>
-                </form>
-              </div>
+              </form>
             </div>
 
             <div className="flex gap-4">
               <button
                 onClick={() => setStep("cart")}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-6 py-2 rounded-lg font-medium transition-colors"
+                style={{ border: "2px solid #e8e2f4", color: "#4a3570" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#6e52a8";
+                  e.currentTarget.style.background = "#f0ecfa";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e2f4";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
                 Voltar
               </button>
@@ -353,46 +349,61 @@ export default function CheckoutPage() {
         {/* Payment Step */}
         {step === "payment" && (
           <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-900">Confirmar Pedido</h1>
+            <h1 className="text-3xl font-bold" style={{ color: "#1a1220" }}>
+              Confirmar Pedido
+            </h1>
 
-            <div className="bg-white rounded-lg shadow p-6 space-y-4">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div
+              className="bg-white rounded-xl shadow p-6 space-y-3"
+              style={{ border: "1px solid #e8e2f4" }}
+            >
+              <h2 className="text-lg font-semibold" style={{ color: "#1a1220" }}>
                 Resumo do Pedido
               </h2>
 
               {items.map((item) => (
                 <div
                   key={item.product.id}
-                  className="flex justify-between items-center pb-3 border-b"
+                  className="flex justify-between items-center pb-3"
+                  style={{ borderBottom: "1px solid #f0ecfa" }}
                 >
                   <div>
-                    <p className="font-medium text-gray-900">{item.product.nome}</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="font-medium" style={{ color: "#1a1220" }}>
+                      {item.product.nome}
+                    </p>
+                    <p className="text-sm" style={{ color: "#9b7fd4" }}>
                       {item.quantity}x R$ {item.product.preco.toFixed(2)}
                     </p>
                   </div>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold" style={{ color: "#4a3570" }}>
                     R$ {(item.product.preco * item.quantity).toFixed(2)}
                   </span>
                 </div>
               ))}
 
-              <div className="pt-4 text-right">
-                <p className="text-2xl font-bold text-blue-600">
+              <div className="pt-2 text-right">
+                <p className="text-2xl font-bold" style={{ color: "#E24B4A" }}>
                   Total: R$ {total.toFixed(2)}
                 </p>
               </div>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700">{error}</p>
+              <div
+                className="p-4 rounded-lg border text-sm"
+                style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+              >
+                {error}
               </div>
             )}
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-blue-700">
-                💳 <strong>Simulação de Pagamento</strong><br />
+            <div
+              className="rounded-xl p-4"
+              style={{ background: "linear-gradient(135deg, #f0ecfa, #e8e2f4)", border: "1px solid #9b7fd4" }}
+            >
+              <p style={{ color: "#4a3570" }}>
+                💳 <strong>Simulação de Pagamento</strong>
+                <br />
                 Este é um sistema de demonstração. Clique em "Finalizar Compra" para
                 simular o pagamento.
               </p>
@@ -402,14 +413,28 @@ export default function CheckoutPage() {
               <button
                 onClick={() => setStep("client")}
                 disabled={isProcessing}
-                className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium disabled:opacity-50"
+                className="px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                style={{ border: "2px solid #e8e2f4", color: "#4a3570" }}
+                onMouseEnter={(e) => {
+                  if (!isProcessing) {
+                    e.currentTarget.style.borderColor = "#6e52a8";
+                    e.currentTarget.style.background = "#f0ecfa";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e2f4";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
                 Voltar
               </button>
               <button
                 onClick={handleFinalizePurchase}
                 disabled={isProcessing}
-                className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-bold disabled:opacity-50"
+                className="flex-1 px-6 py-3 rounded-lg font-bold text-white disabled:opacity-50 transition-colors"
+                style={{ background: "#E24B4A" }}
+                onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = "#A32D2D"; }}
+                onMouseLeave={(e) => { if (!isProcessing) e.currentTarget.style.background = "#E24B4A"; }}
               >
                 {isProcessing ? "Processando..." : "Finalizar Compra"}
               </button>

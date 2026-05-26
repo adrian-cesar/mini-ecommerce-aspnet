@@ -5,6 +5,15 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useClients } from "@/hooks/useClients";
 import type { CreateClientRequest } from "@/types";
 
+const inputStyle = {
+  border: "2px solid #e8e2f4",
+  color: "#1a1220",
+  borderRadius: "8px",
+  padding: "8px 12px",
+  width: "100%",
+  outline: "none",
+};
+
 export default function ClientsPage() {
   const { clients, isLoading, error, createClient, updateClient, deleteClient } =
     useClients();
@@ -71,114 +80,95 @@ export default function ClientsPage() {
     setFormError(null);
   };
 
+  const fields = [
+    { label: "Nome", key: "nome", type: "text", required: true },
+    { label: "Email", key: "email", type: "email", required: true },
+    { label: "CPF", key: "cpf", type: "text" },
+    { label: "Telefone", key: "telefone", type: "tel" },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Clientes</h1>
-            <p className="text-gray-600 mt-1">Gerencie a carteira de clientes</p>
+            <h1 className="text-3xl font-bold" style={{ color: "#1a1220" }}>
+              Clientes
+            </h1>
+            <p className="mt-1" style={{ color: "#6e52a8" }}>
+              Gerencie a carteira de clientes
+            </p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            className="px-4 py-2 rounded-lg font-medium text-white transition-colors"
+            style={{ background: showForm ? "#4a3570" : "#E24B4A" }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = showForm ? "#2d1f3d" : "#A32D2D")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = showForm ? "#4a3570" : "#E24B4A")}
           >
             {showForm ? "Cancelar" : "+ Novo Cliente"}
           </button>
         </div>
 
         {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-red-700">{error}</p>
+          <div
+            className="p-4 rounded-lg border text-sm"
+            style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+          >
+            {error}
           </div>
         )}
 
         {showForm && (
           <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-lg shadow p-6 space-y-4"
+            className="bg-white rounded-xl shadow p-6 space-y-4"
+            style={{ border: "1px solid #e8e2f4" }}
           >
+            <h2 className="text-lg font-semibold" style={{ color: "#1a1220" }}>
+              {editingId ? "Editar Cliente" : "Novo Cliente"}
+            </h2>
+
             {formError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 text-sm">{formError}</p>
+              <div
+                className="p-3 rounded-lg border text-sm"
+                style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+              >
+                {formError}
               </div>
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nome
-                </label>
-                <input
-                  type="text"
-                  value={formData.nome}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nome: e.target.value })
-                  }
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  CPF
-                </label>
-                <input
-                  type="text"
-                  value={formData.cpf || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, cpf: e.target.value })
-                  }
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={formData.telefone || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, telefone: e.target.value })
-                  }
-                  disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                />
-              </div>
+              {fields.map((field) => (
+                <div key={field.key}>
+                  <label className="block text-sm font-medium mb-1" style={{ color: "#4a3570" }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    value={(formData as any)[field.key]}
+                    onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                    disabled={isSubmitting}
+                    style={inputStyle}
+                    onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                    required={field.required}
+                  />
+                </div>
+              ))}
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium mb-1" style={{ color: "#4a3570" }}>
                   Endereço
                 </label>
                 <input
                   type="text"
                   value={formData.endereco || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, endereco: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
                   disabled={isSubmitting}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                  style={inputStyle}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
                 />
               </div>
             </div>
@@ -187,19 +177,27 @@ export default function ClientsPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50"
+                className="px-4 py-2 rounded-lg font-medium text-white disabled:opacity-50 transition-colors"
+                style={{ background: "#E24B4A" }}
+                onMouseEnter={(e) => { if (!isSubmitting) e.currentTarget.style.background = "#A32D2D"; }}
+                onMouseLeave={(e) => { if (!isSubmitting) e.currentTarget.style.background = "#E24B4A"; }}
               >
-                {isSubmitting
-                  ? "Salvando..."
-                  : editingId
-                    ? "Atualizar"
-                    : "Criar"}
+                {isSubmitting ? "Salvando..." : editingId ? "Atualizar" : "Criar"}
               </button>
               <button
                 type="button"
                 onClick={handleCancel}
                 disabled={isSubmitting}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+                style={{ border: "2px solid #e8e2f4", color: "#4a3570" }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = "#6e52a8";
+                  e.currentTarget.style.background = "#f0ecfa";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = "#e8e2f4";
+                  e.currentTarget.style.background = "transparent";
+                }}
               >
                 Cancelar
               </button>
@@ -209,60 +207,71 @@ export default function ClientsPage() {
 
         {isLoading ? (
           <div className="text-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto" />
-            <p className="text-gray-600 mt-4">Carregando clientes...</p>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto" style={{ borderColor: "#E24B4A" }} />
+            <p className="mt-4" style={{ color: "#6e52a8" }}>Carregando clientes...</p>
           </div>
         ) : clients.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-            <p className="text-gray-600">Nenhum cliente encontrado</p>
+          <div
+            className="text-center py-12 rounded-xl border-2 border-dashed"
+            style={{ borderColor: "#e8e2f4", color: "#9b7fd4" }}
+          >
+            Nenhum cliente encontrado
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div
+            className="bg-white rounded-xl shadow overflow-hidden"
+            style={{ border: "1px solid #e8e2f4" }}
+          >
             <table className="w-full">
-              <thead className="bg-gray-50 border-b">
+              <thead style={{ background: "#f5f3fa", borderBottom: "2px solid #e8e2f4" }}>
                 <tr>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Nome
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    CPF
-                  </th>
-                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                    Telefone
-                  </th>
-                  <th className="px-6 py-3 text-right text-sm font-semibold text-gray-900">
-                    Ações
-                  </th>
+                  {["Nome", "Email", "CPF", "Telefone", "Ações"].map((h, i) => (
+                    <th
+                      key={h}
+                      className={`px-6 py-3 text-sm font-semibold ${i === 4 ? "text-right" : "text-left"}`}
+                      style={{ color: "#2d1f3d" }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
                 {clients.map((client) => (
-                  <tr key={client.id} className="border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm text-gray-900">
+                  <tr
+                    key={client.id}
+                    style={{ borderBottom: "1px solid #f0ecfa" }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#fdfcff")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                  >
+                    <td className="px-6 py-4 text-sm font-medium" style={{ color: "#1a1220" }}>
                       {client.nome}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm" style={{ color: "#6e52a8" }}>
                       {client.email}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm" style={{ color: "#9b7fd4" }}>
                       {client.cpf || "-"}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">
+                    <td className="px-6 py-4 text-sm" style={{ color: "#9b7fd4" }}>
                       {client.telefone || "-"}
                     </td>
-                    <td className="px-6 py-4 text-right space-x-2">
+                    <td className="px-6 py-4 text-right space-x-3">
                       <button
                         onClick={() => handleEdit(client)}
-                        className="text-blue-600 hover:text-blue-700 font-medium text-sm"
+                        className="font-medium text-sm transition-colors"
+                        style={{ color: "#4a3570" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#2d1f3d")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "#4a3570")}
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleDelete(client.id)}
-                        className="text-red-600 hover:text-red-700 font-medium text-sm"
+                        className="font-medium text-sm transition-colors"
+                        style={{ color: "#E24B4A" }}
+                        onMouseEnter={(e) => (e.currentTarget.style.color = "#A32D2D")}
+                        onMouseLeave={(e) => (e.currentTarget.style.color = "#E24B4A")}
                       >
                         Deletar
                       </button>

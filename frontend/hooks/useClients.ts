@@ -10,6 +10,7 @@ interface UseClientsResult {
   error: string | null;
   refetch: () => Promise<void>;
   createClient: (data: CreateClientRequest) => Promise<Client>;
+  createGuest: () => Promise<Client>;
   updateClient: (id: number, data: UpdateClientRequest) => Promise<Client>;
   deleteClient: (id: number) => Promise<void>;
 }
@@ -81,12 +82,24 @@ export function useClients(): UseClientsResult {
     }
   }, []);
 
+  const createGuest = useCallback(async () => {
+    try {
+      const guest = await clientService.createGuest();
+      setClients((prev) => [...prev, guest]);
+      return guest;
+    } catch (err) {
+      console.error("Error creating guest client:", err);
+      throw err;
+    }
+  }, []);
+
   return {
     clients,
     isLoading,
     error,
     refetch: fetchClients,
     createClient,
+    createGuest,
     updateClient,
     deleteClient,
   };

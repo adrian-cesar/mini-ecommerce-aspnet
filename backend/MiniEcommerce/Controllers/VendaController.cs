@@ -19,10 +19,12 @@ namespace MiniEcommerce.Controllers
 
         // GET: Lista todas as vendas realizadas
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult Get() => Ok(_service.GetAll());
 
         // GET: Retorna detalhes de uma venda espec�fica
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public IActionResult GetById(int id)
         {
             var venda = _service.GetById(id);
@@ -31,6 +33,7 @@ namespace MiniEcommerce.Controllers
         }
 
         // POST: Cria uma nova venda
+        [AllowAnonymous]
         // Valida estoque e atualiza quantidade de produtos automaticamente
         [HttpPost]
         public IActionResult Post([FromBody] CreateVendaDto dto)
@@ -48,5 +51,6 @@ namespace MiniEcommerce.Controllers
                 return BadRequest(new { mensagem = ex.Message });
             }
         }
+
     }
 }

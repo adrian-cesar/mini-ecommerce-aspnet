@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen" style={{ background: "#f5f3fa" }}>
         <Navbar />
         <div className="flex">
           <Sidebar />

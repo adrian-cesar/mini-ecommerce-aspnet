@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
@@ -40,28 +41,42 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+    <div
+      className="min-h-screen flex items-center justify-center px-4"
+      style={{ background: "linear-gradient(135deg, #1a1220 0%, #2d1f3d 50%, #4a3570 100%)" }}
+    >
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        <div className="rounded-2xl shadow-2xl p-8" style={{ background: "#ffffff" }}>
           <div className="text-center mb-8">
-            <div className="text-4xl mb-3">🛒</div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Mini E-commerce
-            </h1>
-            <p className="text-gray-600 mt-2">Sistema de Gerenciamento</p>
+            <div className="flex justify-center mb-4">
+              <Image
+                src="/primebox-logo.svg"
+                alt="PrimeBox"
+                width={220}
+                height={80}
+                className="w-56 h-auto"
+              />
+            </div>
+            <p className="text-sm mt-1" style={{ color: "#6e52a8" }}>
+              Painel de Gerenciamento
+            </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-red-700 text-sm font-medium">{error}</p>
+              <div
+                className="p-4 rounded-lg border text-sm font-medium"
+                style={{ background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }}
+              >
+                {error}
               </div>
             )}
 
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#2d1f3d" }}
               >
                 Email
               </label>
@@ -72,7 +87,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
                 placeholder="seu@email.com"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors disabled:opacity-50"
+                className="w-full px-4 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                style={{
+                  border: "2px solid #e8e2f4",
+                  color: "#1a1220",
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
                 required
               />
             </div>
@@ -80,7 +101,8 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block text-sm font-semibold mb-2"
+                style={{ color: "#2d1f3d" }}
               >
                 Senha
               </label>
@@ -91,7 +113,13 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
                 placeholder="••••••••"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors disabled:opacity-50"
+                className="w-full px-4 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                style={{
+                  border: "2px solid #e8e2f4",
+                  color: "#1a1220",
+                }}
+                onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
                 required
               />
             </div>
@@ -99,14 +127,17 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 cursor-pointer"
+              className="w-full py-3 px-4 font-bold rounded-lg text-white transition-colors disabled:opacity-50 cursor-pointer"
+              style={{ background: "#E24B4A" }}
+              onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.background = "#A32D2D"; }}
+              onMouseLeave={(e) => { if (!isLoading) e.currentTarget.style.background = "#E24B4A"; }}
             >
               {isLoading ? "Entrando..." : "Entrar"}
             </button>
           </form>
 
-          <p className="text-center text-gray-600 text-sm mt-6">
-            Demo local: use qualquer email e senha para entrar
+          <p className="text-center text-xs mt-6" style={{ color: "#9b7fd4" }}>
+            Demo: use qualquer email e senha para entrar
           </p>
         </div>
       </div>
