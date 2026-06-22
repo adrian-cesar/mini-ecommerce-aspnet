@@ -26,13 +26,20 @@ namespace MiniEcommerce.Services
             return _repository.GetById(id);
         }
 
+        // Busca o cliente vinculado a um usuário (conta da loja).
+        public Cliente GetByUsuarioId(int usuarioId)
+        {
+            return _repository.GetByUsuarioId(usuarioId);
+        }
+
         // Cria um novo cliente a partir do DTO.
         public Cliente Create(CreateClienteDto dto)
         {
             var cliente = new Cliente
             {
                 Nome = dto.Nome,
-                Email = dto.Email
+                Email = dto.Email,
+                Telefone = dto.Telefone
             };
             return _repository.Add(cliente);
         }
@@ -42,9 +49,10 @@ namespace MiniEcommerce.Services
         {
             var existente = _repository.GetById(id);
             if (existente == null) return null;
-            
+
             existente.Nome = dto.Nome;
             existente.Email = dto.Email;
+            existente.Telefone = dto.Telefone;
             _repository.Update(existente);
             return existente;
         }
@@ -58,13 +66,7 @@ namespace MiniEcommerce.Services
         // Cria um cliente 'guest' temporário para uso na loja sem expor outros clientes.
         public Cliente CreateGuest()
         {
-            var unique = System.Guid.NewGuid().ToString().Split('-')[0];
-            var cliente = new Cliente
-            {
-                Nome = $"Guest {unique}",
-                Email = $"guest+{unique}@example.local"
-            };
-            return _repository.Add(cliente);
+            return _repository.CreateGuest();
         }
     }
 }

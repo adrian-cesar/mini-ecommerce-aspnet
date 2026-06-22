@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/hooks/useCart";
 import { useClients } from "@/hooks/useClients";
 import { useSales } from "@/hooks/useSales";
+import { useAuth } from "@/hooks/useAuth";
 import { LojaHeader } from "@/components/LojaHeader";
 import { emitDataRefresh } from "@/lib/dataRefresh";
+import { apiFetch } from "@/lib/api";
 
 const steps = [
   { key: "cart", label: "Carrinho" },
@@ -20,34 +22,61 @@ type Step = (typeof steps)[number]["key"];
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, total, clearCart } = useCart();
-  const { createClient, createGuest } = useClients();
+  const { createGuest } = useClients();
   const { createSale } = useSales();
+  const { user, isAuthenticated, isLoading: authLoading, register } = useAuth();
 
   const [step, setStep] = useState<Step>("cart");
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [newClient, setNewClient] = useState({ nome: "", email: "", telefone: "" });
+  const [newAccount, setNewAccount] = useState({ nome: "", email: "", senha: "" });
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCreateClient = async (e: React.FormEvent) => {
+  // Resolve automaticamente o clienteId de quem já está autenticado (não precisa do step "client").
+  useEffect(() => {
+    if (authLoading || !user || selectedClientId !== null) return;
+
+    let active = true;
+    apiFetch<{ id: number }>(`/cliente/por-usuario/${user.id}`)
+      .then((cliente) => {
+        if (active) setSelectedClientId(cliente.id);
+      })
+      .catch((err) => {
+        if (active) {
+          setError(err instanceof Error ? err.message : "Erro ao carregar seus dados");
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [authLoading, user, selectedClientId]);
+
+  // Assim que o clienteId é resolvido durante o step "client" (registro feito no checkout), avança para o pagamento.
+  useEffect(() => {
+    if (step === "client" && selectedClientId !== null) {
+      setStep("payment");
+      setIsProcessing(false);
+    }
+  }, [step, selectedClientId]);
+
+  const handleRegisterAndContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true);
     setError(null);
 
-    try {
-      if (!newClient.nome || !newClient.email) {
-        setError("Nome e email são obrigatórios");
-        setIsProcessing(false);
-        return;
-      }
+    if (!newAccount.nome || !newAccount.email || !newAccount.senha) {
+      setError("Nome, email e senha são obrigatórios");
+      return;
+    }
 
-      const client = await createClient(newClient);
-      setSelectedClientId(client.id);
-      setNewClient({ nome: "", email: "", telefone: "" });
-      setIsProcessing(false);
-      setStep("payment");
+    setIsProcessing(true);
+
+    try {
+      await register(newAccount.nome, newAccount.email, newAccount.senha);
+      // selectedClientId é resolvido pelo efeito acima quando o usuário autenticado muda,
+      // o que também dispara o avanço automático para o step "payment".
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao criar cliente");
+      setError(err instanceof Error ? err.message : "Erro ao criar conta");
       setIsProcessing(false);
     }
   };
@@ -90,7 +119,7 @@ export default function CheckoutPage() {
       setStep("success");
 
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push(`/loja/meus-pedidos?clienteId=${clientId}`);
       }, 3000);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Erro ao finalizar compra";
@@ -178,7 +207,7 @@ export default function CheckoutPage() {
               Compra Finalizada!
             </h1>
             <p className="mb-6" style={{ color: "#6e52a8" }}>
-              Sua compra foi registrada com sucesso. Redirecionando em breve...
+              Sua compra foi registrada com sucesso. Redirecionando para seus pedidos...
             </p>
             <button
               onClick={() => router.push("/loja")}
@@ -256,13 +285,20 @@ export default function CheckoutPage() {
                 Voltar
               </button>
               <button
-                onClick={() => setStep("client")}
-                className="flex-1 px-6 py-2 rounded-lg font-medium text-white"
+                onClick={() => {
+                  if (isAuthenticated && selectedClientId !== null) {
+                    setStep("payment");
+                  } else {
+                    setStep("client");
+                  }
+                }}
+                disabled={isAuthenticated && selectedClientId === null}
+                className="flex-1 px-6 py-2 rounded-lg font-medium text-white disabled:opacity-50"
                 style={{ background: "#E24B4A" }}
                 onMouseEnter={(e) => (e.currentTarget.style.background = "#A32D2D")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "#E24B4A")}
               >
-                Continuar
+                {isAuthenticated && selectedClientId === null ? "Carregando seus dados..." : "Continuar"}
               </button>
             </div>
           </div>
@@ -289,30 +325,45 @@ export default function CheckoutPage() {
               style={{ border: "1px solid #e8e2f4" }}
             >
               <h2 className="text-lg font-semibold mb-4" style={{ color: "#1a1220" }}>
-                Seus dados
+                Criar conta
               </h2>
-              <form onSubmit={handleCreateClient} className="space-y-3">
-                {[
-                  { type: "text", placeholder: "Nome", key: "nome", required: true },
-                  { type: "email", placeholder: "Email", key: "email", required: true },
-                  { type: "tel", placeholder: "Telefone (opcional)", key: "telefone", required: false },
-                ].map((field) => (
-                  <input
-                    key={field.key}
-                    type={field.type}
-                    placeholder={field.placeholder}
-                    value={newClient[field.key as keyof typeof newClient]}
-                    onChange={(e) =>
-                      setNewClient({ ...newClient, [field.key]: e.target.value })
-                    }
-                    disabled={isProcessing}
-                    className="w-full px-3 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
-                    style={{ border: "2px solid #e8e2f4", color: "#1a1220" }}
-                    onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
-                    onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
-                    required={field.required}
-                  />
-                ))}
+              <form onSubmit={handleRegisterAndContinue} className="space-y-3">
+                <input
+                  type="text"
+                  placeholder="Nome"
+                  value={newAccount.nome}
+                  onChange={(e) => setNewAccount({ ...newAccount, nome: e.target.value })}
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                  style={{ border: "2px solid #e8e2f4", color: "#1a1220" }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                  required
+                />
+                <input
+                  type="email"
+                  placeholder="Email"
+                  value={newAccount.email}
+                  onChange={(e) => setNewAccount({ ...newAccount, email: e.target.value })}
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                  style={{ border: "2px solid #e8e2f4", color: "#1a1220" }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                  required
+                />
+                <input
+                  type="password"
+                  placeholder="Senha"
+                  value={newAccount.senha}
+                  onChange={(e) => setNewAccount({ ...newAccount, senha: e.target.value })}
+                  disabled={isProcessing}
+                  className="w-full px-3 py-2.5 rounded-lg outline-none transition-colors disabled:opacity-50 text-sm"
+                  style={{ border: "2px solid #e8e2f4", color: "#1a1220" }}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                  required
+                />
                 <button
                   type="submit"
                   disabled={isProcessing}
@@ -321,9 +372,21 @@ export default function CheckoutPage() {
                   onMouseEnter={(e) => { if (!isProcessing) e.currentTarget.style.background = "#2d1f3d"; }}
                   onMouseLeave={(e) => { if (!isProcessing) e.currentTarget.style.background = "#4a3570"; }}
                 >
-                  {isProcessing ? "Salvando..." : "Continuar"}
+                  {isProcessing ? "Criando conta..." : "Criar conta e continuar"}
                 </button>
               </form>
+
+              <p className="text-center text-sm mt-4" style={{ color: "#6e52a8" }}>
+                Já tem conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => router.push("/loja/login?redirect=/loja/checkout")}
+                  className="font-semibold"
+                  style={{ color: "#4a3570" }}
+                >
+                  Entrar
+                </button>
+              </p>
             </div>
 
             <div className="flex gap-4">
@@ -411,7 +474,7 @@ export default function CheckoutPage() {
 
             <div className="flex gap-4">
               <button
-                onClick={() => setStep("client")}
+                onClick={() => setStep(isAuthenticated ? "cart" : "client")}
                 disabled={isProcessing}
                 className="px-6 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                 style={{ border: "2px solid #e8e2f4", color: "#4a3570" }}

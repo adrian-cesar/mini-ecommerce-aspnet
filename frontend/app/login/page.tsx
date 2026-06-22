@@ -11,16 +11,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login, isAuthenticated } = useAuth();
+  const { login, logout, user, isAuthenticated } = useAuth();
   const router = useRouter();
+  const isAdmin = user?.role === "admin";
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && isAdmin) {
       router.replace("/dashboard");
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, isAdmin, router]);
 
-  if (isAuthenticated) {
+  if (isAuthenticated && isAdmin) {
     return null;
   }
 
@@ -30,7 +31,14 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      await login(email, password);
+      const loggedUser = await login(email, password);
+
+      if (loggedUser.role !== "admin") {
+        await logout();
+        setError("Acesso restrito ao painel administrativo");
+        return;
+      }
+
       router.push("/dashboard");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Falha ao fazer login";
@@ -137,7 +145,7 @@ export default function LoginPage() {
           </form>
 
           <p className="text-center text-xs mt-6" style={{ color: "#9b7fd4" }}>
-            Demo: use qualquer email e senha para entrar
+            admin@primebox.com / admin123
           </p>
         </div>
       </div>

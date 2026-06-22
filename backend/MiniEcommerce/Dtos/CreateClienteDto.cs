@@ -4,11 +4,13 @@ namespace MiniEcommerce.Dtos
 {
     public class CreateClienteDto
     {
-        [Required(ErrorMessage = "O nome do cliente é obrigatório.")]
+        [Required(ErrorMessage = "O nome do cliente ï¿½ obrigatï¿½rio.")]
         public string Nome { get; set; }
 
-        [Required(ErrorMessage = "O email é obrigatório.")]
-        [EmailAddress(ErrorMessage = "Email inválido.")]
+        [Required(ErrorMessage = "O email ï¿½ obrigatï¿½rio.")]
+        [EmailAddress(ErrorMessage = "Email invï¿½lido.")]
         public string Email { get; set; }
+
+        public string? Telefone { get; set; }
     }
 }

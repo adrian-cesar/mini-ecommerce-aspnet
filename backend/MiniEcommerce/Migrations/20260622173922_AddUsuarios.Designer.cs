@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MiniEcommerce.Data;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MiniEcommerce.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260622173922_AddUsuarios")]
+    partial class AddUsuarios
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,15 +41,7 @@ namespace MiniEcommerce.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Telefone")
-                        .HasColumnType("text");
-
-                    b.Property<int?>("UsuarioId")
-                        .HasColumnType("integer");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Clientes");
                 });
@@ -128,10 +123,6 @@ namespace MiniEcommerce.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("SenhaHash")
                         .IsRequired()
                         .HasColumnType("text");
@@ -165,15 +156,6 @@ namespace MiniEcommerce.Migrations
                     b.ToTable("Vendas");
                 });
 
-            modelBuilder.Entity("MiniEcommerce.Models.Cliente", b =>
-                {
-                    b.HasOne("MiniEcommerce.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId");
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("MiniEcommerce.Models.ItemVenda", b =>
                 {
                     b.HasOne("MiniEcommerce.Models.Produto", "Produto")
@@ -198,7 +180,7 @@ namespace MiniEcommerce.Migrations
                     b.HasOne("MiniEcommerce.Models.Cliente", "Cliente")
                         .WithMany("Vendas")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Cliente");

@@ -6,11 +6,18 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role?: string;
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface RegisterRequest {
+  nome: string;
+  email: string;
+  senha: string;
 }
 
 export interface LoginResponse {
@@ -22,7 +29,8 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (nome: string, email: string, senha: string) => Promise<void>;
   logout: () => void;
 }
 

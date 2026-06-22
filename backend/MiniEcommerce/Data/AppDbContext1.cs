@@ -1,1 +1,0 @@
-﻿// Arquivo deixado em branco de propósito. Era um arquivo auxiliar/residual do protótipo.

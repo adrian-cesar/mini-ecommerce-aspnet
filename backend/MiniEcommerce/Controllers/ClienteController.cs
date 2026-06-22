@@ -30,6 +30,15 @@ namespace MiniEcommerce.Controllers
             return Ok(cliente);
         }
 
+        // GET: Retorna o cliente vinculado a um usuário (conta da loja)
+        [HttpGet("por-usuario/{usuarioId}")]
+        public IActionResult GetByUsuarioId(int usuarioId)
+        {
+            var cliente = _service.GetByUsuarioId(usuarioId);
+            if (cliente == null) return NotFound();
+            return Ok(cliente);
+        }
+
         // POST: Cria um novo cliente
         [HttpPost]
         public IActionResult Post([FromBody] CreateClienteDto dto)
@@ -62,8 +71,15 @@ namespace MiniEcommerce.Controllers
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _service.Delete(id);
-            return NoContent();
+            try
+            {
+                _service.Delete(id);
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
         }
     }
 }

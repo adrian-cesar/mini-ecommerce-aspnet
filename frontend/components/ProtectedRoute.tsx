@@ -9,13 +9,22 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const isAdmin = user?.role === "admin";
+
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
       router.push("/login");
+      return;
     }
-  }, [isLoading, isAuthenticated, router]);
+
+    if (!isAdmin) {
+      router.push("/loja");
+    }
+  }, [isLoading, isAuthenticated, isAdmin, router]);
 
   if (isLoading) {
     return (
@@ -28,7 +37,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !isAdmin) {
     return null;
   }
 

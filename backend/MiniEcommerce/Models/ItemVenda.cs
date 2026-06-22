@@ -12,9 +12,8 @@ namespace MiniEcommerce.Models
         public Venda Venda { get; set; }
         
         public int ProdutoId { get; set; }
-        
+
         // Referência ao produto vendido
-        [JsonIgnore]
         public Produto Produto { get; set; }
         
         public int Quantidade { get; set; }

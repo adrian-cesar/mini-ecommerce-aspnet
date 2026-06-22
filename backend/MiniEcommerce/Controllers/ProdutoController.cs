@@ -62,7 +62,6 @@ namespace MiniEcommerce.Controllers
 
         // TEMP: Restaura estoques para valores seed (apenas para correção rápida em dev)
         [HttpPost("reset-seeds")]
-        [AllowAnonymous]
         public IActionResult ResetSeeds()
         {
             // Valores definidos conforme SeedData

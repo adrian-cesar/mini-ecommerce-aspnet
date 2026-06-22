@@ -8,6 +8,7 @@ namespace MiniEcommerce.Services
     {
         IEnumerable<Cliente> GetAll();
         Cliente GetById(int id);
+        Cliente GetByUsuarioId(int usuarioId);
         Cliente Create(CreateClienteDto dto);
         Cliente CreateGuest();
         Cliente Update(int id, UpdateClienteDto dto);

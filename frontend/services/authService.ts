@@ -1,8 +1,9 @@
 import { apiFetch, setAuthToken, clearAuthToken } from "@/lib/api";
-import type { LoginRequest, LoginResponse, User } from "@/types";
+import type { LoginRequest, LoginResponse, RegisterRequest, User } from "@/types";
 
 const AUTH_ENDPOINTS = {
   LOGIN: "/auth/login",
+  REGISTER: "/auth/register",
   LOGOUT: "/auth/logout",
   ME: "/auth/me",
 };
@@ -33,44 +34,33 @@ function clearStoredUser(): void {
   localStorage.removeItem(AUTH_USER_KEY);
 }
 
-function createDemoUser(email: string): User {
-  const localPart = email.split("@")[0] || "usuario";
-  const name = localPart
-    .replace(/[._-]+/g, " ")
-    .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-  return {
-    id: "demo-user",
-    email,
-    name: name.trim() || "Usuario Demo",
-  };
-}
-
 export const authService = {
   async login(credentials: LoginRequest): Promise<LoginResponse> {
-    try {
-      const response = await apiFetch<LoginResponse>(AUTH_ENDPOINTS.LOGIN, {
-        method: "POST",
-        body: JSON.stringify(credentials),
-      });
+    const response = await apiFetch<LoginResponse>(AUTH_ENDPOINTS.LOGIN, {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
 
-      if (response.token) {
-        setAuthToken(response.token);
-      }
-
-      setStoredUser(response.user);
-      return response;
-    } catch {
-      const user = createDemoUser(credentials.email);
-      const response: LoginResponse = {
-        token: `demo-${Date.now()}`,
-        user,
-      };
-
+    if (response.token) {
       setAuthToken(response.token);
-      setStoredUser(user);
-      return response;
     }
+
+    setStoredUser(response.user);
+    return response;
+  },
+
+  async register(data: RegisterRequest): Promise<LoginResponse> {
+    const response = await apiFetch<LoginResponse>(AUTH_ENDPOINTS.REGISTER, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+
+    if (response.token) {
+      setAuthToken(response.token);
+    }
+
+    setStoredUser(response.user);
+    return response;
   },
 
   async logout(): Promise<void> {
