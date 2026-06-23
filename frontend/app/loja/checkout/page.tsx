@@ -33,13 +33,17 @@ export default function CheckoutPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Resolve automaticamente o clienteId de quem já está autenticado (não precisa do step "client").
+  // Se a resolução acontecer durante o step "client" (registro feito no checkout), avança para o pagamento.
   useEffect(() => {
     if (authLoading || !user || selectedClientId !== null) return;
 
     let active = true;
     apiFetch<{ id: number }>(`/cliente/por-usuario/${user.id}`)
       .then((cliente) => {
-        if (active) setSelectedClientId(cliente.id);
+        if (!active) return;
+        setSelectedClientId(cliente.id);
+        setStep((prev) => (prev === "client" ? "payment" : prev));
+        setIsProcessing(false);
       })
       .catch((err) => {
         if (active) {
@@ -51,14 +55,6 @@ export default function CheckoutPage() {
       active = false;
     };
   }, [authLoading, user, selectedClientId]);
-
-  // Assim que o clienteId é resolvido durante o step "client" (registro feito no checkout), avança para o pagamento.
-  useEffect(() => {
-    if (step === "client" && selectedClientId !== null) {
-      setStep("payment");
-      setIsProcessing(false);
-    }
-  }, [step, selectedClientId]);
 
   const handleRegisterAndContinue = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -467,7 +463,7 @@ export default function CheckoutPage() {
               <p style={{ color: "#4a3570" }}>
                 💳 <strong>Simulação de Pagamento</strong>
                 <br />
-                Este é um sistema de demonstração. Clique em "Finalizar Compra" para
+                Este é um sistema de demonstração. Clique em &quot;Finalizar Compra&quot; para
                 simular o pagamento.
               </p>
             </div>

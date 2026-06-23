@@ -5,9 +5,7 @@ interface ClientApiResponse {
   id: number;
   nome: string;
   email: string;
-  cpf?: string;
   telefone?: string;
-  endereco?: string;
 }
 
 const CLIENTS_ENDPOINT = "/cliente";
@@ -17,9 +15,7 @@ function mapToClient(client: ClientApiResponse): Client {
     id: client.id,
     nome: client.nome,
     email: client.email,
-    cpf: client.cpf,
     telefone: client.telefone,
-    endereco: client.endereco,
   };
 }
 

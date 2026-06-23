@@ -41,17 +41,21 @@ export function CartContextProvider({ children }: CartContextProviderProps) {
 
   // Initialize from localStorage
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(CART_STORAGE_KEY);
-      if (stored) {
-        const data: CartStorageData = JSON.parse(stored);
-        setItems(data.items);
+    function loadCart() {
+      try {
+        const stored = window.localStorage.getItem(CART_STORAGE_KEY);
+        if (stored) {
+          const data: CartStorageData = JSON.parse(stored);
+          setItems(data.items);
+        }
+      } catch (error) {
+        console.error("Failed to load cart from storage:", error);
+        setItems([]);
       }
-    } catch (error) {
-      console.error("Failed to load cart from storage:", error);
-      setItems([]);
+      setMounted(true);
     }
-    setMounted(true);
+
+    loadCart();
   }, []);
 
   // Save to localStorage whenever items change

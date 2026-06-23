@@ -55,6 +55,9 @@ builder.Services.AddScoped<IClienteService, ClienteService>();
 builder.Services.AddScoped<IVendaRepository, VendaRepository>();
 builder.Services.AddScoped<IVendaService, VendaService>();
 
+// Registrar servi�o de autentica��o
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 var app = builder.Build();
 
 // Inicializar banco de dados com dados de exemplo

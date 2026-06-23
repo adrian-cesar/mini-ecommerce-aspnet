@@ -1,13 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using MiniEcommerce.Data;
 using MiniEcommerce.Dtos;
 using MiniEcommerce.Models;
+using MiniEcommerce.Services;
 
 namespace MiniEcommerce.Controllers
 {
@@ -16,19 +15,19 @@ namespace MiniEcommerce.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
-        private readonly AppDbContext _context;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config, AppDbContext context)
+        public AuthController(IConfiguration config, IAuthService authService)
         {
             _config = config;
-            _context = context;
+            _authService = authService;
         }
 
         /// <summary>
         /// Realiza login do usuário e retorna JWT token
         /// </summary>
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public IActionResult Login([FromBody] LoginRequest request)
         {
             // Validação básica
             if (string.IsNullOrWhiteSpace(request.Email) ||
@@ -37,24 +36,16 @@ namespace MiniEcommerce.Controllers
                 return BadRequest(new { message = "Email e senha são obrigatórios" });
             }
 
-            var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(request.Password, usuario.SenhaHash))
+            try
             {
-                return Unauthorized(new { message = "Email ou senha inválidos" });
+                var usuario = _authService.Login(request.Email, request.Password);
+                var token = GenerateToken(usuario);
+                return Ok(new { token, user = ToUserResponse(usuario) });
             }
-
-            var token = GenerateToken(usuario);
-            var user = new
+            catch (UnauthorizedAccessException ex)
             {
-                id = usuario.Id.ToString(),
-                email = usuario.Email,
-                name = usuario.Nome,
-                role = usuario.Role
-            };
-
-            return Ok(new { token, user });
+                return Unauthorized(new { message = ex.Message });
+            }
         }
 
         /// <summary>
@@ -62,48 +53,29 @@ namespace MiniEcommerce.Controllers
         /// </summary>
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public IActionResult Register([FromBody] RegisterRequest request)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var existente = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == request.Email);
-
-            if (existente != null)
+            try
             {
-                return Conflict(new { message = "Email já cadastrado" });
+                var usuario = _authService.Register(request.Nome, request.Email, request.Senha);
+                var token = GenerateToken(usuario);
+                return StatusCode(201, new { token, user = ToUserResponse(usuario) });
             }
-
-            var usuario = new Usuario
+            catch (InvalidOperationException ex)
             {
-                Nome = request.Nome,
-                Email = request.Email,
-                SenhaHash = BCrypt.Net.BCrypt.HashPassword(request.Senha),
-                Role = "cliente"
-            };
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-
-            var cliente = new Cliente
-            {
-                Nome = request.Nome,
-                Email = request.Email,
-                UsuarioId = usuario.Id
-            };
-            _context.Clientes.Add(cliente);
-            await _context.SaveChangesAsync();
-
-            var token = GenerateToken(usuario);
-            var user = new
-            {
-                id = usuario.Id.ToString(),
-                email = usuario.Email,
-                name = usuario.Nome,
-                role = usuario.Role
-            };
-
-            return StatusCode(201, new { token, user });
+                return Conflict(new { message = ex.Message });
+            }
         }
+
+        private static object ToUserResponse(Usuario usuario) => new
+        {
+            id = usuario.Id.ToString(),
+            email = usuario.Email,
+            name = usuario.Nome,
+            role = usuario.Role
+        };
 
         /// <summary>
         /// Gera JWT token com claims de email e user ID

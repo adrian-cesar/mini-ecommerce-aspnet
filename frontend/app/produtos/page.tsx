@@ -82,6 +82,20 @@ export default function ProductsPage() {
     setFormError(null);
   };
 
+  const fields: Array<{
+    label: string;
+    key: keyof CreateProductRequest;
+    type: string;
+    step?: string;
+    required?: boolean;
+    placeholder?: string;
+  }> = [
+    { label: "Nome", key: "nome", type: "text", required: true },
+    { label: "Preço", key: "preco", type: "number", step: "0.01", required: true },
+    { label: "Estoque", key: "estoque", type: "number", required: true },
+    { label: "Categoria", key: "categoria", type: "text", placeholder: "Ex: Eletrônicos..." },
+  ];
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -134,12 +148,7 @@ export default function ProductsPage() {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { label: "Nome", key: "nome", type: "text", required: true },
-                { label: "Preço", key: "preco", type: "number", step: "0.01", required: true },
-                { label: "Estoque", key: "estoque", type: "number", required: true },
-                { label: "Categoria", key: "categoria", type: "text", placeholder: "Ex: Eletrônicos..." },
-              ].map((field) => (
+              {fields.map((field) => (
                 <div key={field.key}>
                   <label
                     className="block text-sm font-medium mb-1"
@@ -150,7 +159,7 @@ export default function ProductsPage() {
                   <input
                     type={field.type}
                     step={field.step}
-                    value={(formData as any)[field.key]}
+                    value={formData[field.key]}
                     onChange={(e) =>
                       setFormData({
                         ...formData,

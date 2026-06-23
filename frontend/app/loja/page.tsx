@@ -6,6 +6,7 @@ import { useProducts } from "@/hooks/useProducts";
 import { useCart } from "@/hooks/useCart";
 import { LojaHeader } from "@/components/LojaHeader";
 import { LojaFooter } from "@/components/LojaFooter";
+import type { Product } from "@/types";
 
 export default function LojaPage() {
   const { products, isLoading } = useProducts();
@@ -40,7 +41,7 @@ export default function LojaPage() {
     });
   }, [products, searchTerm, selectedCategory]);
 
-  const handleAddToCart = (product: any) => {
+  const handleAddToCart = (product: Product) => {
     addItem(product, 1);
     setAddedProductId(product.id);
     setTimeout(() => setAddedProductId(null), 2000);

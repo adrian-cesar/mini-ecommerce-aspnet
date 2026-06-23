@@ -6,12 +6,13 @@ import { productService } from "@/services/productService";
 import { useCart } from "@/hooks/useCart";
 import { LojaHeader } from "@/components/LojaHeader";
 import { LojaFooter } from "@/components/LojaFooter";
+import type { Product } from "@/types";
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { addItem } = useCart();
-  const [product, setProduct] = useState<any | null>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState(false);

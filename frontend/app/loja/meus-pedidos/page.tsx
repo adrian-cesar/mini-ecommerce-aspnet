@@ -40,18 +40,18 @@ function MeusPedidosContent() {
   const clienteIdParam = searchParams.get("clienteId");
   const { user, isLoading: authLoading } = useAuth();
 
-  const [clienteId, setClienteId] = useState<string | null>(clienteIdParam);
+  const [resolvedClienteId, setResolvedClienteId] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Resolve o clienteId: query string (fluxo do checkout) ou usuário logado.
+  // clienteId vem da query string (fluxo do checkout) ou, na falta dela, é resolvido a partir do usuário logado.
+  const clienteId = clienteIdParam ?? resolvedClienteId;
+
+  // Resolve o clienteId a partir do usuário logado quando não veio na query string.
   useEffect(() => {
-    if (clienteIdParam) {
-      setClienteId(clienteIdParam);
-      return;
-    }
+    if (clienteIdParam) return;
 
     if (authLoading) return;
 
@@ -65,7 +65,7 @@ function MeusPedidosContent() {
 
     apiFetch<{ id: number }>(`/cliente/por-usuario/${user.id}`)
       .then((cliente) => {
-        if (active) setClienteId(String(cliente.id));
+        if (active) setResolvedClienteId(String(cliente.id));
       })
       .catch((err) => {
         if (active) {
@@ -84,21 +84,26 @@ function MeusPedidosContent() {
     if (!clienteId) return;
 
     let active = true;
-    setIsLoading(true);
-    setError(null);
 
-    apiFetch<Pedido[]>(`/venda/cliente/${clienteId}`)
-      .then((data) => {
+    async function fetchPedidos() {
+      if (active) {
+        setIsLoading(true);
+        setError(null);
+      }
+
+      try {
+        const data = await apiFetch<Pedido[]>(`/venda/cliente/${clienteId}`);
         if (active) setPedidos(data);
-      })
-      .catch((err) => {
+      } catch (err) {
         if (active) {
           setError(err instanceof Error ? err.message : "Erro ao carregar pedidos");
         }
-      })
-      .finally(() => {
+      } finally {
         if (active) setIsLoading(false);
-      });
+      }
+    }
+
+    fetchPedidos();
 
     return () => {
       active = false;

@@ -70,9 +70,7 @@ export interface Client {
   id: number;
   nome: string;
   email: string;
-  cpf?: string;
   telefone?: string;
-  endereco?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -80,9 +78,7 @@ export interface Client {
 export interface CreateClientRequest {
   nome: string;
   email: string;
-  cpf?: string;
   telefone?: string;
-  endereco?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
