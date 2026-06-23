@@ -8,6 +8,7 @@ interface ProductApiResponse {
   estoque: number;
   descricao?: string;
   categoria?: string;
+  categoriaId?: number | null;
   imagemUrl?: string;
 }
 
@@ -21,6 +22,7 @@ function mapToProduct(product: ProductApiResponse): Product {
     estoque: product.estoque,
     descricao: product.descricao,
     categoria: product.categoria,
+    categoriaId: product.categoriaId,
     imagemUrl: product.imagemUrl,
   };
 }

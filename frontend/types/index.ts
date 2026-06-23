@@ -45,6 +45,7 @@ export interface Product {
   estoque: number;
   descricao?: string;
   categoria?: string;
+  categoriaId?: number | null;
   imagemUrl?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -55,12 +56,30 @@ export interface CreateProductRequest {
   preco: number;
   estoque: number;
   descricao?: string;
-  categoria?: string;
+  categoriaId?: number | null;
   imagemUrl?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateProductRequest extends CreateProductRequest {}
+
+// =====================
+// CATEGORIAS
+// =====================
+
+export interface Category {
+  id: number;
+  nome: string;
+  imagemUrl?: string;
+}
+
+export interface CreateCategoryRequest {
+  nome: string;
+  imagemUrl?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdateCategoryRequest extends CreateCategoryRequest {}
 
 // =====================
 // CLIENTES

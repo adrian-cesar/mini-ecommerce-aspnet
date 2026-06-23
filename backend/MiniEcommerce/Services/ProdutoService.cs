@@ -36,6 +36,7 @@ namespace MiniEcommerce.Services
                 Estoque = dto.Estoque,
                 Descricao = dto.Descricao,
                 Categoria = dto.Categoria,
+                CategoriaId = dto.CategoriaId,
                 ImagemUrl = dto.ImagemUrl
             };
             return _repository.Add(produto);
@@ -51,6 +52,7 @@ namespace MiniEcommerce.Services
             existente.Estoque = dto.Estoque;
             existente.Descricao = dto.Descricao;
             existente.Categoria = dto.Categoria;
+            existente.CategoriaId = dto.CategoriaId;
             existente.ImagemUrl = dto.ImagemUrl;
             _repository.Update(existente);
             return existente;

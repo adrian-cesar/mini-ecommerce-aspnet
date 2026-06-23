@@ -85,6 +85,7 @@ namespace MiniEcommerce.Controllers
                         Preco = prod.Preco,
                         Descricao = prod.Descricao,
                         Categoria = prod.Categoria,
+                        CategoriaId = prod.CategoriaId,
                         ImagemUrl = prod.ImagemUrl,
                         Estoque = prod.Estoque
                     });

@@ -13,6 +13,7 @@ namespace MiniEcommerce.Data
         public DbSet<Venda> Vendas { get; set; }
         public DbSet<ItemVenda> ItensVenda { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Categoria> Categorias { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,14 @@ namespace MiniEcommerce.Data
                 .WithMany(c => c.Vendas)
                 .HasForeignKey(v => v.ClienteId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Relação Produto -> Categoria sem propriedade de navegação (Produto já tem um
+            // campo de texto livre chamado "Categoria", então não há como nomear uma navigation property).
+            modelBuilder.Entity<Produto>()
+                .HasOne<Categoria>()
+                .WithMany()
+                .HasForeignKey(p => p.CategoriaId)
+                .IsRequired(false);
         }
     }
 }

@@ -58,6 +58,10 @@ builder.Services.AddScoped<IVendaService, VendaService>();
 // Registrar servi�o de autentica��o
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Registrar servi�os e reposit�rios para Categoria
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+builder.Services.AddScoped<ICategoriaService, CategoriaService>();
+
 var app = builder.Build();
 
 // Inicializar banco de dados com dados de exemplo

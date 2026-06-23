@@ -1,26 +1,27 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useMemo, useRef, useState } from "react";
 import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import { useCart } from "@/hooks/useCart";
 import { LojaHeader } from "@/components/LojaHeader";
 import { LojaFooter } from "@/components/LojaFooter";
+import { LojaHeroBanner } from "@/components/LojaHeroBanner";
+import { LojaCategoriesSection } from "@/components/LojaCategoriesSection";
+import { LojaBestSellersSection } from "@/components/LojaBestSellersSection";
+import { ProductCard } from "@/components/ProductCard";
 import type { Product } from "@/types";
+
+type CategoryFilter = number | "sem-categoria" | null;
 
 export default function LojaPage() {
   const { products, isLoading } = useProducts();
+  const { categories } = useCategories();
   const { addItem } = useCart();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryFilter>(null);
   const [addedProductId, setAddedProductId] = useState<number | null>(null);
-
-  const categories = useMemo(() => {
-    const cats = new Set(
-      products.filter((p) => p.categoria).map((p) => p.categoria)
-    );
-    return Array.from(cats);
-  }, [products]);
+  const productsSectionRef = useRef<HTMLDivElement>(null);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -34,8 +35,8 @@ export default function LojaPage() {
         selectedCategory === null
           ? true
           : selectedCategory === "sem-categoria"
-          ? !product.categoria || product.categoria === ""
-          : product.categoria === selectedCategory;
+          ? product.categoriaId == null
+          : product.categoriaId === selectedCategory;
 
       return matchesSearch && matchesCategory && product.estoque > 0;
     });
@@ -47,38 +48,29 @@ export default function LojaPage() {
     setTimeout(() => setAddedProductId(null), 2000);
   };
 
+  const handleSelectCategory = (categoriaId: number) => {
+    setSelectedCategory(categoriaId);
+    productsSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "#f5f3fa" }}>
       <LojaHeader />
 
-      {/* Hero Banner */}
-      <div
-        className="text-white py-16 md:py-24"
-        style={{ background: "linear-gradient(135deg, #1a1220 0%, #2d1f3d 50%, #4a3570 100%)" }}
-      >
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-white">
-            Bem-vindo à <span style={{ color: "#E24B4A" }}>Prime</span>
-            <span style={{ color: "#FAC775" }}>Box</span>
-          </h1>
-          <p className="text-lg md:text-xl mb-8" style={{ color: "#9b7fd4" }}>
-            Descubra produtos premium com os melhores preços
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {["✓ Frete Grátis", "✓ Seguro", "✓ Devolução Fácil"].map((item) => (
-              <div
-                key={item}
-                className="backdrop-blur px-4 py-2 rounded-lg text-sm font-medium"
-                style={{ background: "rgba(255,255,255,0.1)", border: "1px solid rgba(155,127,212,0.3)", color: "#ffffff" }}
-              >
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
+      <div className="max-w-7xl mx-auto w-full px-4 pt-8 pb-4">
+        <LojaHeroBanner />
       </div>
 
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
+      <div className="max-w-7xl mx-auto w-full px-4">
+        <LojaCategoriesSection categories={categories} onSelectCategory={handleSelectCategory} />
+        <LojaBestSellersSection
+          products={products}
+          addedProductId={addedProductId}
+          onAddToCart={handleAddToCart}
+        />
+      </div>
+
+      <main ref={productsSectionRef} className="flex-1 max-w-7xl mx-auto w-full px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar Filters */}
           <div className="lg:col-span-1">
@@ -112,13 +104,13 @@ export default function LojaPage() {
                 </label>
                 <div className="space-y-1">
                   {[
-                    { key: null, label: "Todas as Categorias" },
-                    { key: "sem-categoria", label: "Sem categoria" },
-                    ...categories.map((cat) => ({ key: cat, label: cat })),
+                    { key: null as CategoryFilter, label: "Todas as Categorias" },
+                    { key: "sem-categoria" as CategoryFilter, label: "Sem categoria" },
+                    ...categories.map((cat) => ({ key: cat.id as CategoryFilter, label: cat.nome })),
                   ].map((item) => (
                     <button
                       key={String(item.key)}
-                      onClick={() => setSelectedCategory(item.key as string | null)}
+                      onClick={() => setSelectedCategory(item.key)}
                       className="w-full text-left px-3 py-2 rounded-lg transition-colors text-sm font-medium"
                       style={
                         selectedCategory === item.key
@@ -170,75 +162,12 @@ export default function LojaPage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   {filteredProducts.map((product) => (
-                    <Link
+                    <ProductCard
                       key={product.id}
-                      href={`/loja/produto/${product.id}`}
-                      className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all hover:-translate-y-1 overflow-hidden flex flex-col no-underline"
-                      style={{ border: "1px solid #e8e2f4" }}
-                    >
-                      {/* Image */}
-                      <div
-                        className="w-full h-48 flex items-center justify-center overflow-hidden"
-                        style={{ background: "linear-gradient(135deg, #f0ecfa 0%, #e8e2f4 100%)" }}
-                      >
-                        {product.imagemUrl ? (
-                          <img
-                            src={product.imagemUrl}
-                            alt={product.nome}
-                            className="w-full h-full object-cover hover:scale-110 transition-transform"
-                          />
-                        ) : (
-                          <div className="text-4xl">📦</div>
-                        )}
-                      </div>
-
-                      {/* Content */}
-                      <div className="p-4 flex-1 flex flex-col">
-                        {product.categoria && (
-                          <span
-                            className="inline-block px-2 py-1 text-xs font-semibold rounded mb-2 w-fit"
-                            style={{ background: "#f0ecfa", color: "#6e52a8" }}
-                          >
-                            {product.categoria}
-                          </span>
-                        )}
-
-                        <h3 className="font-bold text-lg mb-2 line-clamp-2" style={{ color: "#1a1220" }}>
-                          {product.nome}
-                        </h3>
-
-                        {product.descricao && (
-                          <p className="text-sm mb-3 line-clamp-2" style={{ color: "#6e52a8" }}>
-                            {product.descricao}
-                          </p>
-                        )}
-
-                        <div className="mt-auto">
-                          <div className="flex justify-between items-center mb-3">
-                            <span className="text-2xl font-bold" style={{ color: "#E24B4A" }}>
-                              R$ {product.preco.toFixed(2)}
-                            </span>
-                            <span className="text-xs" style={{ color: "#9b7fd4" }}>
-                              Estoque: {product.estoque}
-                            </span>
-                          </div>
-
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleAddToCart(product);
-                            }}
-                            className="w-full py-2 rounded-lg font-bold transition-all text-white text-sm"
-                            style={{
-                              background: addedProductId === product.id ? "#2d8a4e" : "#E24B4A",
-                            }}
-                          >
-                            {addedProductId === product.id ? "✓ Adicionado!" : "🛒 Adicionar ao Carrinho"}
-                          </button>
-                        </div>
-                      </div>
-                    </Link>
+                      product={product}
+                      isAdded={addedProductId === product.id}
+                      onAddToCart={handleAddToCart}
+                    />
                   ))}
                 </div>
               </>

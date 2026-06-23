@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useProducts } from "@/hooks/useProducts";
+import { useCategories } from "@/hooks/useCategories";
 import type { CreateProductRequest } from "@/types";
 
 const inputStyle = {
@@ -17,6 +18,7 @@ const inputStyle = {
 export default function ProductsPage() {
   const { products, isLoading, error, createProduct, updateProduct, deleteProduct } =
     useProducts();
+  const { categories } = useCategories();
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<CreateProductRequest>({
@@ -24,7 +26,7 @@ export default function ProductsPage() {
     preco: 0,
     estoque: 0,
     descricao: "",
-    categoria: "",
+    categoriaId: null,
     imagemUrl: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
@@ -58,7 +60,7 @@ export default function ProductsPage() {
       preco: product.preco,
       estoque: product.estoque,
       descricao: product.descricao || "",
-      categoria: product.categoria || "",
+      categoriaId: product.categoriaId ?? null,
       imagemUrl: product.imagemUrl || "",
     });
     setEditingId(product.id);
@@ -78,13 +80,13 @@ export default function ProductsPage() {
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ nome: "", preco: 0, estoque: 0, descricao: "", categoria: "", imagemUrl: "" });
+    setFormData({ nome: "", preco: 0, estoque: 0, descricao: "", categoriaId: null, imagemUrl: "" });
     setFormError(null);
   };
 
   const fields: Array<{
     label: string;
-    key: keyof CreateProductRequest;
+    key: "nome" | "preco" | "estoque";
     type: string;
     step?: string;
     required?: boolean;
@@ -93,7 +95,6 @@ export default function ProductsPage() {
     { label: "Nome", key: "nome", type: "text", required: true },
     { label: "Preço", key: "preco", type: "number", step: "0.01", required: true },
     { label: "Estoque", key: "estoque", type: "number", required: true },
-    { label: "Categoria", key: "categoria", type: "text", placeholder: "Ex: Eletrônicos..." },
   ];
 
   return (
@@ -175,6 +176,32 @@ export default function ProductsPage() {
                   />
                 </div>
               ))}
+
+              <div>
+                <label className="block text-sm font-medium mb-1" style={{ color: "#4a3570" }}>
+                  Categoria
+                </label>
+                <select
+                  value={formData.categoriaId ?? ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      categoriaId: e.target.value === "" ? null : Number(e.target.value),
+                    })
+                  }
+                  disabled={isSubmitting}
+                  style={inputStyle}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
+                >
+                  <option value="">Sem categoria</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.nome}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1" style={{ color: "#4a3570" }}>
