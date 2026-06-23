@@ -51,6 +51,15 @@ O sistema é composto por duas partes principais:
 - **Frontend**: Next.js
 - **Banco de dados**: PostgreSQL
 
+### Separação no frontend:
+
+O frontend reúne duas áreas distintas dentro do mesmo app Next.js:
+
+- **Painel Administrativo** (`/login`, `/dashboard`, `/produtos`, `/categorias`, `/clientes`, `/vendas`) — acesso restrito a usuários com `role = admin`; permite CRUD de produtos, categorias e clientes, além de KPIs e gráficos de vendas no dashboard.
+- **Loja (storefront)** (`/loja`, `/loja/produto/[id]`, `/loja/carrinho`, `/loja/checkout`, `/loja/login`, `/loja/meus-pedidos`) — acesso público para navegação, carrinho e checkout (inclusive como cliente guest, sem login); o histórico de pedidos exige autenticação.
+
+Ambas as áreas compartilham a mesma tabela de usuários e o mesmo token JWT.
+
 ### Separação em camadas do backend:
 
 - **Controllers** → Responsáveis pelas rotas e pelo tratamento das requisições HTTP  
@@ -113,26 +122,42 @@ Biblioteca de mock para testes unitários em .NET.
 
 ---
 
-🔹 **Padrões de Projeto (GoF)**
+🔹 **Padrões Arquiteturais**
 
-Serão aplicados:
+Aplicados no backend:
 
-- **Strategy** → Para implementação das diferentes formas de pagamento  
-- **Facade** → Centralização da lógica da venda no serviço responsável  
-- **Singleton** → Utilização na configuração e injeção de dependências  
+- **Repository** → `Repositories/` isola o acesso a dados via EF Core de cada entidade
+- **Service Layer** → `Services/` concentra as regras de negócio (ex: `VendaService` valida estoque e centraliza a criação de vendas em uma transação)
+- **DTO (Data Transfer Object)** → `Dtos/` define os formatos de entrada/saída da API, desacoplados dos models
+- **Dependency Injection** → registro de serviços e repositórios no `Program.cs`
 
-**Justificativa:** Aplicação de boas práticas conforme literatura clássica de Engenharia de Software.
+**Justificativa:** Separação de responsabilidades, testabilidade (uso de mocks com Moq) e manutenção facilitada.
 
 ---
 
 # 🔄 6. Funcionalidades Principais  
 
-✅ **CRUD**
+✅ **CRUD (Painel Admin)**
 - Produto  
+- Categoria  
 - Cliente  
 
 ✅ **Transação**
 - Venda com validação de estoque e atualização automática  
+
+✅ **Autenticação**
+- Login/registro de cliente (`/loja/login`) e login de admin (`/login`), via JWT
+- Checkout como cliente cadastrado ou como guest (sem login)
+
+✅ **Loja (storefront)**
+- Catálogo público com busca e filtro por categoria  
+- Carrinho de compras e checkout em etapas  
+- Histórico de pedidos do cliente autenticado (`/loja/meus-pedidos`)
+
+✅ **Dashboard Administrativo**
+- KPIs (receita total, itens vendidos, ticket médio, produtos ativos)  
+- Gráficos de receita, vendas por categoria e top produtos  
+- Alertas de estoque baixo/zerado
 
 ---
 
@@ -184,7 +209,8 @@ npm run dev
 3. Acessos
 
 - API: http://localhost:5250
-- Frontend: http://localhost:3000
+- Loja (público): http://localhost:3000/loja
+- Painel Admin: http://localhost:3000/login (`admin@primebox.com` / `admin123`, criado automaticamente pelo seed)
 
 ---
 
@@ -194,3 +220,14 @@ npm run dev
 cd backend
 dotnet test
 ```
+
+Testes unitários (xUnit + Moq) cobrem `AuthService`, `VendaService`, `ProdutoService` e `ClienteService`.
+
+---
+
+# ⚙️ 10. CI/CD
+
+Workflows configurados em `.github/workflows/`:
+
+- **`backend-ci.yml`** — a cada push/PR: restaura, builda (`Release`) e executa `dotnet test` no backend.
+- **`frontend-ci.yml`** — a cada push/PR: `npm ci`, lint (`eslint`) e `npm run build` no frontend.
