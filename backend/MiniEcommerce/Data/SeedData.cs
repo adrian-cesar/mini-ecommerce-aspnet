@@ -22,6 +22,28 @@ namespace MiniEcommerce.Data
                 {
                     context.Database.Migrate();
 
+                    if (!context.Usuarios.Any())
+                    {
+                        context.Usuarios.Add(new Usuario
+                        {
+                            Email = "admin@primebox.com",
+                            SenhaHash = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                            Nome = "Admin",
+                            Role = "admin"
+                        });
+                        context.SaveChanges();
+                        Console.WriteLine("✅ Usuário admin padrão criado.");
+                    }
+
+                    // Hotfix: garante que o admin tenha Role = "admin" mesmo se criado antes deste campo existir
+                    var admin = context.Usuarios.FirstOrDefault(u => u.Email == "admin@primebox.com");
+                    if (admin != null && admin.Role != "admin")
+                    {
+                        admin.Role = "admin";
+                        context.SaveChanges();
+                        Console.WriteLine("Role do admin corrigida para 'admin'.");
+                    }
+
                     // Se já tem dados, não adiciona novamente, porém corrige estoques zerados (hotfix dev)
                     if (context.Produtos.Any() || context.Clientes.Any() || context.Vendas.Any())
                     {

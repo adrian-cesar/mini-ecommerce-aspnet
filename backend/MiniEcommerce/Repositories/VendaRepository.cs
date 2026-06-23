@@ -21,10 +21,20 @@ namespace MiniEcommerce.Repositories
             return _context.Vendas.Include(v => v.ItensVenda).ToList();
         }
 
-        // Busca uma venda especÌfica pelo ID
+        // Busca uma venda especÔøΩfica pelo ID
         public Venda GetById(int id)
         {
             return _context.Vendas.Include(v => v.ItensVenda).FirstOrDefault(v => v.Id == id);
+        }
+
+        // Retorna todas as vendas de um cliente espec√≠fico (com itens e produtos)
+        public IEnumerable<Venda> GetByClienteId(int clienteId)
+        {
+            return _context.Vendas
+                .Include(v => v.ItensVenda)
+                    .ThenInclude(i => i.Produto)
+                .Where(v => v.ClienteId == clienteId)
+                .ToList();
         }
 
         // Registra uma nova venda no banco de dados

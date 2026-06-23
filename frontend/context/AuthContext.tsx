@@ -40,6 +40,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await authService.login({ email, password });
       setUser(response.user);
+      return response.user;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const register = useCallback(async (nome: string, email: string, senha: string) => {
+    setIsLoading(true);
+    try {
+      const response = await authService.register({ nome, email, senha });
+      setUser(response.user);
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +71,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAuthenticated: user !== null,
     isLoading,
     login,
+    register,
     logout,
   };
 

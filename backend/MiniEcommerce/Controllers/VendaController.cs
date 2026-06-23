@@ -32,6 +32,11 @@ namespace MiniEcommerce.Controllers
             return Ok(venda);
         }
 
+        // GET: Retorna todas as vendas de um cliente espec�fico (usado na loja, sem login de admin)
+        [HttpGet("cliente/{clienteId}")]
+        [AllowAnonymous]
+        public IActionResult GetByClienteId(int clienteId) => Ok(_service.GetByClienteId(clienteId));
+
         // POST: Cria uma nova venda
         [AllowAnonymous]
         // Valida estoque e atualiza quantidade de produtos automaticamente

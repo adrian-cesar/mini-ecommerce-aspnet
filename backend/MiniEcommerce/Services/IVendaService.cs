@@ -8,8 +8,9 @@ namespace MiniEcommerce.Services
     {
         IEnumerable<Venda> GetAll();
         Venda GetById(int id);
-        
-        // Este é o método mais importante: cria a venda validando estoque
+        IEnumerable<Venda> GetByClienteId(int clienteId);
+
+        // Este ï¿½ o mï¿½todo mais importante: cria a venda validando estoque
         Venda Create(CreateVendaDto dto);
     }
 }

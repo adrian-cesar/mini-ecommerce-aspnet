@@ -6,11 +6,18 @@ export interface User {
   id: string;
   email: string;
   name: string;
+  role?: string;
 }
 
 export interface LoginRequest {
   email: string;
   password: string;
+}
+
+export interface RegisterRequest {
+  nome: string;
+  email: string;
+  senha: string;
 }
 
 export interface LoginResponse {
@@ -22,7 +29,8 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (nome: string, email: string, senha: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -37,6 +45,7 @@ export interface Product {
   estoque: number;
   descricao?: string;
   categoria?: string;
+  categoriaId?: number | null;
   imagemUrl?: string;
   createdAt?: string;
   updatedAt?: string;
@@ -47,12 +56,30 @@ export interface CreateProductRequest {
   preco: number;
   estoque: number;
   descricao?: string;
-  categoria?: string;
+  categoriaId?: number | null;
   imagemUrl?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateProductRequest extends CreateProductRequest {}
+
+// =====================
+// CATEGORIAS
+// =====================
+
+export interface Category {
+  id: number;
+  nome: string;
+  imagemUrl?: string;
+}
+
+export interface CreateCategoryRequest {
+  nome: string;
+  imagemUrl?: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface UpdateCategoryRequest extends CreateCategoryRequest {}
 
 // =====================
 // CLIENTES
@@ -62,9 +89,7 @@ export interface Client {
   id: number;
   nome: string;
   email: string;
-  cpf?: string;
   telefone?: string;
-  endereco?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -72,9 +97,7 @@ export interface Client {
 export interface CreateClientRequest {
   nome: string;
   email: string;
-  cpf?: string;
   telefone?: string;
-  endereco?: string;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type

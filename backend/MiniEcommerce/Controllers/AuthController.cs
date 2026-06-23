@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
+using MiniEcommerce.Dtos;
+using MiniEcommerce.Models;
+using MiniEcommerce.Services;
 
 namespace MiniEcommerce.Controllers
 {
@@ -11,10 +15,12 @@ namespace MiniEcommerce.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
+        private readonly IAuthService _authService;
 
-        public AuthController(IConfiguration config)
+        public AuthController(IConfiguration config, IAuthService authService)
         {
             _config = config;
+            _authService = authService;
         }
 
         /// <summary>
@@ -24,30 +30,59 @@ namespace MiniEcommerce.Controllers
         public IActionResult Login([FromBody] LoginRequest request)
         {
             // Validação básica
-            if (string.IsNullOrWhiteSpace(request.Email) || 
+            if (string.IsNullOrWhiteSpace(request.Email) ||
                 string.IsNullOrWhiteSpace(request.Password))
             {
                 return BadRequest(new { message = "Email e senha são obrigatórios" });
             }
 
-            // Para fins de demo, aceita qualquer email/senha não vazia
-            var token = GenerateToken(request.Email);
-            var user = new 
-            { 
-                id = Guid.NewGuid().ToString(), 
-                email = request.Email, 
-                name = request.Email.Split("@")[0] 
-            };
-
-            return Ok(new { token, user });
+            try
+            {
+                var usuario = _authService.Login(request.Email, request.Password);
+                var token = GenerateToken(usuario);
+                return Ok(new { token, user = ToUserResponse(usuario) });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
         }
+
+        /// <summary>
+        /// Registra um novo cliente da loja, criando Usuario e Cliente vinculados
+        /// </summary>
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public IActionResult Register([FromBody] RegisterRequest request)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var usuario = _authService.Register(request.Nome, request.Email, request.Senha);
+                var token = GenerateToken(usuario);
+                return StatusCode(201, new { token, user = ToUserResponse(usuario) });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { message = ex.Message });
+            }
+        }
+
+        private static object ToUserResponse(Usuario usuario) => new
+        {
+            id = usuario.Id.ToString(),
+            email = usuario.Email,
+            name = usuario.Nome,
+            role = usuario.Role
+        };
 
         /// <summary>
         /// Gera JWT token com claims de email e user ID
         /// </summary>
-        private string GenerateToken(string email)
+        private string GenerateToken(Usuario usuario)
         {
-            var jwtKey = _config.GetValue<string>("Jwt:Key") 
+            var jwtKey = _config.GetValue<string>("Jwt:Key")
                 ?? "sua-chave-secreta-super-segura-123456-mini-ecommerce";
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
@@ -55,9 +90,10 @@ namespace MiniEcommerce.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Email, email),
-                new Claim(ClaimTypes.NameIdentifier, Guid.NewGuid().ToString()),
-                new Claim("user", email)
+                new Claim(ClaimTypes.Email, usuario.Email),
+                new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Role, usuario.Role),
+                new Claim("user", usuario.Email)
             };
 
             var token = new JwtSecurityToken(

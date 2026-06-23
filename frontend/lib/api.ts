@@ -78,11 +78,20 @@ export async function apiFetch<T>(
         cache: "no-store",
       }).catch(() => null);
 
-      if (retryResp && retryResp.ok) return (await retryResp.json()) as T;
+      if (retryResp && retryResp.ok) {
+        if (retryResp.status === 204) return undefined as T;
+        const retryText = await retryResp.text();
+        return (retryText ? JSON.parse(retryText) : undefined) as T;
+      }
     }
 
     throw new ApiError(message, response.status);
   }
 
-  return (await response.json()) as T;
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  const text = await response.text();
+  return (text ? JSON.parse(text) : undefined) as T;
 }

@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using MiniEcommerce.Data;
 using MiniEcommerce.Models;
 
@@ -26,9 +28,28 @@ namespace MiniEcommerce.Repositories
             return _context.Clientes.Find(id);
         }
 
+        // Busca o cliente vinculado a um usuário (conta da loja).
+        public Cliente GetByUsuarioId(int usuarioId)
+        {
+            return _context.Clientes.FirstOrDefault(c => c.UsuarioId == usuarioId);
+        }
+
         // Adiciona um novo cliente no banco.
         public Cliente Add(Cliente cliente)
         {
+            _context.Clientes.Add(cliente);
+            _context.SaveChanges();
+            return cliente;
+        }
+
+        // Cria e persiste um cliente 'convidado' com email gerado automaticamente.
+        public Cliente CreateGuest()
+        {
+            var cliente = new Cliente
+            {
+                Nome = "Convidado",
+                Email = $"guest_{System.Guid.NewGuid()}@primebox.com"
+            };
             _context.Clientes.Add(cliente);
             _context.SaveChanges();
             return cliente;
@@ -45,10 +66,18 @@ namespace MiniEcommerce.Repositories
         public void Delete(int id)
         {
             var cliente = _context.Clientes.Find(id);
-            if (cliente != null)
+            if (cliente == null) return;
+
+            _context.Clientes.Remove(cliente);
+
+            try
             {
-                _context.Clientes.Remove(cliente);
                 _context.SaveChanges();
+            }
+            catch (DbUpdateException)
+            {
+                // Violação de FK: o cliente possui vendas vinculadas (ON DELETE RESTRICT).
+                throw new InvalidOperationException("Este cliente possui pedidos e não pode ser excluído");
             }
         }
     }

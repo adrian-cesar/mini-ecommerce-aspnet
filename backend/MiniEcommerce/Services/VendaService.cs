@@ -36,6 +36,12 @@ namespace MiniEcommerce.Services
             return _vendaRepository.GetById(id);
         }
 
+        // Busca todas as vendas de um cliente específico (com itens e produtos).
+        public IEnumerable<Venda> GetByClienteId(int clienteId)
+        {
+            return _vendaRepository.GetByClienteId(clienteId);
+        }
+
         // Cria uma venda validando o estoque antes de salvar.
         public Venda Create(CreateVendaDto dto)
         {

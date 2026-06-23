@@ -22,12 +22,16 @@ export default function ClientsPage() {
   const [formData, setFormData] = useState<CreateClientRequest>({
     nome: "",
     email: "",
-    cpf: "",
     telefone: "",
-    endereco: "",
   });
   const [formError, setFormError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  const showFeedback = (type: "success" | "error", message: string) => {
+    setFeedback({ type, message });
+    setTimeout(() => setFeedback(null), 4000);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,11 +41,13 @@ export default function ClientsPage() {
     try {
       if (editingId) {
         await updateClient(editingId, formData);
+        showFeedback("success", "Cliente atualizado com sucesso.");
       } else {
         await createClient(formData);
+        showFeedback("success", "Cliente criado com sucesso.");
       }
 
-      setFormData({ nome: "", email: "", cpf: "", telefone: "", endereco: "" });
+      setFormData({ nome: "", email: "", telefone: "" });
       setEditingId(null);
       setShowForm(false);
     } catch (err) {
@@ -55,11 +61,10 @@ export default function ClientsPage() {
     setFormData({
       nome: client.nome,
       email: client.email,
-      cpf: client.cpf || "",
       telefone: client.telefone || "",
-      endereco: client.endereco || "",
     });
     setEditingId(client.id);
+    setFormError(null);
     setShowForm(true);
   };
 
@@ -68,22 +73,27 @@ export default function ClientsPage() {
 
     try {
       await deleteClient(id);
+      showFeedback("success", "Cliente excluído com sucesso.");
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : "Erro ao deletar cliente");
+      showFeedback("error", err instanceof Error ? err.message : "Erro ao deletar cliente");
     }
   };
 
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ nome: "", email: "", cpf: "", telefone: "", endereco: "" });
+    setFormData({ nome: "", email: "", telefone: "" });
     setFormError(null);
   };
 
-  const fields = [
+  const fields: Array<{
+    label: string;
+    key: keyof CreateClientRequest;
+    type: string;
+    required?: boolean;
+  }> = [
     { label: "Nome", key: "nome", type: "text", required: true },
     { label: "Email", key: "email", type: "email", required: true },
-    { label: "CPF", key: "cpf", type: "text" },
     { label: "Telefone", key: "telefone", type: "tel" },
   ];
 
@@ -109,6 +119,19 @@ export default function ClientsPage() {
             {showForm ? "Cancelar" : "+ Novo Cliente"}
           </button>
         </div>
+
+        {feedback && (
+          <div
+            className="p-4 rounded-lg border text-sm font-medium"
+            style={
+              feedback.type === "success"
+                ? { background: "#f0fff4", borderColor: "#2d8a4e", color: "#1f6b3a" }
+                : { background: "#fff0f0", borderColor: "#E24B4A", color: "#A32D2D" }
+            }
+          >
+            {feedback.message}
+          </div>
+        )}
 
         {error && (
           <div
@@ -146,7 +169,7 @@ export default function ClientsPage() {
                   </label>
                   <input
                     type={field.type}
-                    value={(formData as any)[field.key]}
+                    value={formData[field.key]}
                     onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
                     disabled={isSubmitting}
                     style={inputStyle}
@@ -156,21 +179,6 @@ export default function ClientsPage() {
                   />
                 </div>
               ))}
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1" style={{ color: "#4a3570" }}>
-                  Endereço
-                </label>
-                <input
-                  type="text"
-                  value={formData.endereco || ""}
-                  onChange={(e) => setFormData({ ...formData, endereco: e.target.value })}
-                  disabled={isSubmitting}
-                  style={inputStyle}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#6e52a8")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#e8e2f4")}
-                />
-              </div>
             </div>
 
             <div className="flex gap-3">
@@ -225,10 +233,10 @@ export default function ClientsPage() {
             <table className="w-full">
               <thead style={{ background: "#f5f3fa", borderBottom: "2px solid #e8e2f4" }}>
                 <tr>
-                  {["Nome", "Email", "CPF", "Telefone", "Ações"].map((h, i) => (
+                  {["Nome", "Email", "Telefone", "Ações"].map((h, i) => (
                     <th
                       key={h}
-                      className={`px-6 py-3 text-sm font-semibold ${i === 4 ? "text-right" : "text-left"}`}
+                      className={`px-6 py-3 text-sm font-semibold ${i === 3 ? "text-right" : "text-left"}`}
                       style={{ color: "#2d1f3d" }}
                     >
                       {h}
@@ -249,9 +257,6 @@ export default function ClientsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm" style={{ color: "#6e52a8" }}>
                       {client.email}
-                    </td>
-                    <td className="px-6 py-4 text-sm" style={{ color: "#9b7fd4" }}>
-                      {client.cpf || "-"}
                     </td>
                     <td className="px-6 py-4 text-sm" style={{ color: "#9b7fd4" }}>
                       {client.telefone || "-"}

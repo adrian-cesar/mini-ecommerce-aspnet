@@ -22,6 +22,26 @@ namespace MiniEcommerce.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("MiniEcommerce.Models.Categoria", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImagemUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categorias");
+                });
+
             modelBuilder.Entity("MiniEcommerce.Models.Cliente", b =>
                 {
                     b.Property<int>("Id")
@@ -38,47 +58,17 @@ namespace MiniEcommerce.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Clientes");
-                });
-
-            modelBuilder.Entity("MiniEcommerce.Models.Cupom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Ativo")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Codigo")
-                        .IsRequired()
+                    b.Property<string>("Telefone")
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("DataExpiracao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("Desconto")
-                        .HasColumnType("numeric");
-
-                    b.Property<bool>("IsPercentual")
-                        .HasColumnType("boolean");
-
-                    b.Property<int?>("MaxUsos")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Usos")
+                    b.Property<int?>("UsuarioId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cupons");
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("Clientes");
                 });
 
             modelBuilder.Entity("MiniEcommerce.Models.ItemVenda", b =>
@@ -119,6 +109,9 @@ namespace MiniEcommerce.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("CategoriaId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasColumnType("text");
@@ -139,7 +132,38 @@ namespace MiniEcommerce.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoriaId");
+
                     b.ToTable("Produtos");
+                });
+
+            modelBuilder.Entity("MiniEcommerce.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("SenhaHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("MiniEcommerce.Models.Venda", b =>
@@ -166,6 +190,15 @@ namespace MiniEcommerce.Migrations
                     b.ToTable("Vendas");
                 });
 
+            modelBuilder.Entity("MiniEcommerce.Models.Cliente", b =>
+                {
+                    b.HasOne("MiniEcommerce.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId");
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("MiniEcommerce.Models.ItemVenda", b =>
                 {
                     b.HasOne("MiniEcommerce.Models.Produto", "Produto")
@@ -185,12 +218,19 @@ namespace MiniEcommerce.Migrations
                     b.Navigation("Venda");
                 });
 
+            modelBuilder.Entity("MiniEcommerce.Models.Produto", b =>
+                {
+                    b.HasOne("MiniEcommerce.Models.Categoria", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriaId");
+                });
+
             modelBuilder.Entity("MiniEcommerce.Models.Venda", b =>
                 {
                     b.HasOne("MiniEcommerce.Models.Cliente", "Cliente")
                         .WithMany("Vendas")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Cliente");
